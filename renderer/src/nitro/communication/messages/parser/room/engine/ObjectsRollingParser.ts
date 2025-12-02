@@ -4,13 +4,11 @@ export class ObjectsRollingParser implements IMessageParser {
     private _rollerId: number;
     private _itemsRolling: ObjectRolling[];
     private _unitRolling: ObjectRolling;
-    private _animationTime: number;
 
     public flush(): boolean {
         this._rollerId = 0;
         this._itemsRolling = [];
         this._unitRolling = null;
-        this._animationTime = 500;
         return true;
     }
 
@@ -33,8 +31,6 @@ export class ObjectsRollingParser implements IMessageParser {
         }
     
         this._rollerId = wrapper.readInt();
-    
-        this._animationTime = wrapper.readInt();
     
         if (!wrapper.bytesAvailable) return true;
     
@@ -70,7 +66,4 @@ export class ObjectsRollingParser implements IMessageParser {
         return this._unitRolling;
     }
 
-    public get animationTime(): number {
-        return this._animationTime;
-    }
 }

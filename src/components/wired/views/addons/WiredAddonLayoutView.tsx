@@ -1,5 +1,4 @@
 import { WiredAddonLayoutCode } from '../../../../api';
-import { WiredAddonAnimationTimeView } from './WiredAddonAnimationTimeView';
 import { WiredAddonCancelAnimation } from './WiredAddonCancelAnimation';
 import { WiredAddonCarryUsers } from './WiredAddonCarryUsers';
 import { WiredAddonFurniVariableView } from './WiredAddonFurniVariableView';
@@ -14,15 +13,11 @@ import { WiredAddonTextOutputUsernameView } from './WiredAddonTextOutputUsername
 import { WiredAddonTextOutputVariableView } from './WiredAddonTextOutputVariableView';
 import { WiredAddonReferenceVariableView } from './WiredAddonReferenceVariableView';
 
-
-
 export const WiredAddonLayoutView = (code: number) =>
 {
     switch (code)
     {
 
-        case WiredAddonLayoutCode.ANIMATION_TIME:
-            return <WiredAddonAnimationTimeView />;
         case WiredAddonLayoutCode.CANCEL_ANIMATION:
             return <WiredAddonCancelAnimation />;
         case WiredAddonLayoutCode.CARRY_USERS:

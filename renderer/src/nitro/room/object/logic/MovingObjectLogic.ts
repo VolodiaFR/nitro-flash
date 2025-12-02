@@ -128,9 +128,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._locationDelta.assign(message.targetLocation);
         this._locationDelta.subtract(this._location);
 
-        // Usar animationTime del mensaje para establecer el intervalo
         const clampedTime = Math.max(50, Math.min(message.animationTime || MovingObjectLogic.DEFAULT_UPDATE_INTERVAL, 2000));
-        this.updateInterval = clampedTime; 
+        this.updateInterval = clampedTime;
     }
 
     protected getLocationOffset(): IVector3D

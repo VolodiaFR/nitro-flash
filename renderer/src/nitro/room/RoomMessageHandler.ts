@@ -439,7 +439,6 @@ export class RoomMessageHandler extends Disposable
         if (!(event instanceof ObjectsRollingEvent) || !event.connection || !this._roomCreator) return;
 
         const parser = event.getParser();
-        const animationTime = parser.animationTime;
 
         this._roomCreator.updateRoomObjectFloor(this._currentRoomId, parser.rollerId, null, null, 1, null);
         this._roomCreator.updateRoomObjectFloor(this._currentRoomId, parser.rollerId, null, null, 2, null);
@@ -456,8 +455,7 @@ export class RoomMessageHandler extends Disposable
                     this._currentRoomId,
                     rollData.id,
                     rollData.location,
-                    rollData.targetLocation,
-                    animationTime
+                    rollData.targetLocation
                 );
             }
         }
@@ -619,7 +617,6 @@ export class RoomMessageHandler extends Disposable
 
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
-        const animationTime = parser.animationTime;
 
         if (!itemSlides || itemSlides.length === 0) return;
 
@@ -636,8 +633,7 @@ export class RoomMessageHandler extends Disposable
                 this._currentRoomId,
                 slide.virtualId,
                 from,
-                to,
-                animationTime
+                to
             );
 
             // Actualizar la rotación si cambió
@@ -655,7 +651,6 @@ export class RoomMessageHandler extends Disposable
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
         const userSlides = parser.userSlides;
-        const animationTime = parser.animationTime;
 
 
         // Procesar items
@@ -672,8 +667,7 @@ export class RoomMessageHandler extends Disposable
                     this._currentRoomId,
                     slide.virtualId,
                     from,
-                    to,
-                    animationTime
+                    to
                 );
 
                 // Actualizar la rotación si cambió
