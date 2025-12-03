@@ -857,8 +857,9 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
         }
 
         const startTime = new Date().valueOf();
-        const furniturePerTick = 5;
+        const furniturePerTick = 3; // Reducido de 5 a 3 para menos carga por frame
         const hasTickLimit = true;
+        const maxTimePerTick = 15; // Reducido de 40ms a 15ms para evitar skips de frames
 
         for(const instanceData of this._roomInstanceDatas.values())
         {
@@ -878,7 +879,7 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
                     {
                         const time = new Date().valueOf();
 
-                        if((time - startTime) >= 40)
+                        if((time - startTime) >= maxTimePerTick)
                         {
                             this._skipFurnitureCreationForNextFrame = true;
 
@@ -898,7 +899,7 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
                     {
                         const time = new Date().valueOf();
 
-                        if((time - startTime) >= 40)
+                        if((time - startTime) >= maxTimePerTick)
                         {
                             this._skipFurnitureCreationForNextFrame = true;
 
@@ -1079,6 +1080,9 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
 
     private updateRoomCameras(time: number): void
     {
+        const startTime = new Date().valueOf();
+        const maxTimePerTick = 10; // Limit camera updates to 10ms per frame to prevent lag
+
         for(const instanceData of this._roomInstanceDatas.values())
         {
             if(!instanceData) continue;
@@ -1098,6 +1102,14 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
             if((instanceData.roomId !== this._activeRoomId) || !this._activeRoomIsDragged)
             {
                 this.updateRoomCamera(instanceData.roomId, 1, location, time);
+            }
+
+            // Check time after each camera update to avoid frame drops
+            const currentTime = new Date().valueOf();
+            if((currentTime - startTime) >= maxTimePerTick)
+            {
+                // Skip remaining cameras if taking too long
+                break;
             }
         }
 
@@ -2095,8 +2107,20 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
         return new Vector3d(location.x, location.y, _local_5);
     }
 
+    private _updateThrottleCount: number = 0;
+    private _lastUpdateTime: number = 0;
+
     public updateRoomObjectUserAction(roomId: number, objectId: number, action: string, value: number, parameter: string = null): boolean
     {
+        const currentTime = GetTickerTime();
+        if (currentTime - this._lastUpdateTime < 33) { // Throttle to ~30 FPS
+            if (this._updateThrottleCount >= 5) return false; // Máximo 5 updates por frame
+            this._updateThrottleCount++;
+        } else {
+            this._updateThrottleCount = 1;
+            this._lastUpdateTime = currentTime;
+        }
+
         const instanceData = this.getRoomInstanceData(roomId);
         const object = this.getRoomObjectUser(roomId, objectId);
 
