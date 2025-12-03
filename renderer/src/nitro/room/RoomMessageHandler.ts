@@ -439,6 +439,7 @@ export class RoomMessageHandler extends Disposable
         if (!(event instanceof ObjectsRollingEvent) || !event.connection || !this._roomCreator) return;
 
         const parser = event.getParser();
+        const animationTime = parser.animationTime;
 
         this._roomCreator.updateRoomObjectFloor(this._currentRoomId, parser.rollerId, null, null, 1, null);
         this._roomCreator.updateRoomObjectFloor(this._currentRoomId, parser.rollerId, null, null, 2, null);
@@ -455,7 +456,8 @@ export class RoomMessageHandler extends Disposable
                     this._currentRoomId,
                     rollData.id,
                     rollData.location,
-                    rollData.targetLocation
+                    rollData.targetLocation,
+                    animationTime
                 );
             }
         }
@@ -467,12 +469,13 @@ export class RoomMessageHandler extends Disposable
             this._roomCreator.updateRoomObjectUserLocation(
                 this._currentRoomId,
                 unitRollData.id,
-                unitRollData.location,
-                unitRollData.targetLocation,
-                false,
-                0,
-                null,
-                NaN
+                unitRollData.location, // location (3er parámetro)
+                unitRollData.targetLocation, // targetLocation (4to)
+                false, // canStandUp (5to) - valor por defecto: false
+                0, // baseY (6to) - valor por defecto: 0
+                null, // direction (7mo) - valor por defecto: null
+                NaN, // headDirection (8vo) - valor por defecto: NaN
+                animationTime // animationTime (9no) - ¡Aquí el valor correcto!
             );
 
             const object = this._roomCreator.getRoomObjectUser(this._currentRoomId, unitRollData.id);
@@ -617,6 +620,7 @@ export class RoomMessageHandler extends Disposable
 
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
+        const animationTime = parser.animationTime;
 
         if (!itemSlides || itemSlides.length === 0) return;
 
@@ -633,7 +637,8 @@ export class RoomMessageHandler extends Disposable
                 this._currentRoomId,
                 slide.virtualId,
                 from,
-                to
+                to,
+                animationTime
             );
 
             // Actualizar la rotación si cambió
@@ -651,6 +656,7 @@ export class RoomMessageHandler extends Disposable
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
         const userSlides = parser.userSlides;
+        const animationTime = parser.animationTime;
 
 
         // Procesar items
@@ -667,7 +673,8 @@ export class RoomMessageHandler extends Disposable
                     this._currentRoomId,
                     slide.virtualId,
                     from,
-                    to
+                    to,
+                    animationTime
                 );
 
                 // Actualizar la rotación si cambió
@@ -693,10 +700,11 @@ export class RoomMessageHandler extends Disposable
                     slide.roomIndex,
                     from,
                     to,
-                    true,
-                    0,
-                    null,
-                    NaN
+                    true, // canStandUp
+                    0, // baseY
+                    null, // direction (no cambiar)
+                    NaN, // headDirection (no cambiar)
+                    animationTime
                 );
             }
         }
@@ -944,7 +952,7 @@ export class RoomMessageHandler extends Disposable
 
             if (status.didMove) goal = new Vector3d(status.targetX, status.targetY, status.targetZ);
 
-            this._roomCreator.updateRoomObjectUserLocation(this._currentRoomId, status.id, location, goal, status.canStandUp, height, direction, status.headDirection);
+            this._roomCreator.updateRoomObjectUserLocation(this._currentRoomId, status.id, location, goal, status.canStandUp, height, direction, status.headDirection, status.animationTime);
             this._roomCreator.updateRoomObjectUserFlatControl(this._currentRoomId, status.id, null);
 
             let isPosture = true;

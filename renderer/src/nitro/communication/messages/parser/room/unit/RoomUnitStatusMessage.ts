@@ -14,9 +14,10 @@ export class RoomUnitStatusMessage
     private _targetZ: number;
     private _didMove: boolean;
     private _canStandUp: boolean;
+    private _animationTime: number;
     private _actions: RoomUnitStatusAction[];
 
-    constructor(id: number, x: number, y: number, z: number, height: number, headDirection: number, direction: number, targetX: number = 0, targetY: number = 0, targetZ: number = 0, didMove: boolean, canStandUp: boolean, actions: RoomUnitStatusAction[])
+    constructor(id: number, x: number, y: number, z: number, height: number, headDirection: number, direction: number, targetX: number = 0, targetY: number = 0, targetZ: number = 0, didMove: boolean, canStandUp: boolean,animationTime: number, actions: RoomUnitStatusAction[])
     {
         this._id = id;
         this._x = x;
@@ -30,6 +31,7 @@ export class RoomUnitStatusMessage
         this._targetZ = targetZ;
         this._didMove = didMove;
         this._canStandUp = canStandUp;
+        this._animationTime = animationTime;
         this._actions = actions || [];
     }
 
@@ -98,4 +100,8 @@ export class RoomUnitStatusMessage
         return this._actions;
     }
 
+    public get animationTime(): number
+    {
+        return this._animationTime;
+    }
 }
