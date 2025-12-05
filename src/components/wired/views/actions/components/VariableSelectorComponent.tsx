@@ -20,9 +20,12 @@ import { RoomInternalUserVariablesMessageEvent } from '@nitrots/nitro-renderer/s
 import { RoomUserVariablesMessageEvent } from '@nitrots/nitro-renderer/src/nitro/communication/messages/incoming/room/variables/RoomUserVariablesMessageEvent';
 import { RoomGlobalVariablesMessageEvent } from '@nitrots/nitro-renderer/src/nitro/communication/messages/incoming/room/variables/RoomGlobalVariablesMessageEvent';
 import { RoomInternalGlobalVariablesMessageEvent } from '@nitrots/nitro-renderer/src/nitro/communication/messages/incoming/room/variables/RoomInternalGlobalVariablesMessageEvent';
+import { RoomContextVariablesMessageEvent } from '@nitrots/nitro-renderer/src/nitro/communication/messages/incoming/room/variables/RoomContextVariablesMessageEvent';
+import { RoomInternalContextVariablesMessageEvent } from '@nitrots/nitro-renderer/src/nitro/communication/messages/incoming/room/variables/RoomInternalContextVariablesMessageEvent';
 import { RequestRoomVariablesComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/RequestRoomVariablesComposer';
 import { RequestUserVariablesComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/RequestUserVariablesComposer';
 import { RequestGlobalVariablesComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/RequestGlobalVariablesComposer';
+import { RequestContextVariablesComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/RequestContextVariablesComposer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../../../../api';
 import { Column, Flex, Text } from '../../../../../common';
@@ -31,6 +34,7 @@ import { useMessageEvent } from '../../../../../hooks/events';
 interface VariableSelectorComponentProps {
     selectedVariable: string;
     onVariableChange: (variable: string) => void;
+    onSelectedDetailsChange?: (variable: any | null) => void;
     targetType: number; // 0 = furni (rgb(186, 152, 22)), 1 = user (rgb(38, 142, 41)), 2 = global (rgb(131, 29, 141)), 3 = context (rgb(176, 94, 30))
     onTargetTypeChange: (targetType: number) => void;
     typeOfAdvancedOption: number;
@@ -48,6 +52,7 @@ interface VariableSelectorComponentProps {
 export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
     selectedVariable,
     onVariableChange,
+    onSelectedDetailsChange,
     targetType,
     onTargetTypeChange,
     typeOfAdvancedOption,
@@ -62,12 +67,14 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
     showTargetButtons = true
 }) => {
     const varsRef = useRef({
-        user: [] as any[],
-        furni: [] as any[],
+        furniUser: [] as any[],
+        furniInternal: [] as any[],
         userInternal: [] as any[],
         userUser: [] as any[],
-        global: [] as any[],
-        internalGlobal: [] as any[]
+        globalUser: [] as any[],
+        globalInternal: [] as any[],
+        contextUser: [] as any[],
+        contextInternal: [] as any[]
     });
 
     const [varsVersion, setVarsVersion] = useState(0);
@@ -80,6 +87,7 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
         SendMessageComposer(new RequestRoomVariablesComposer());
         SendMessageComposer(new RequestUserVariablesComposer());
         SendMessageComposer(new RequestGlobalVariablesComposer());
+        SendMessageComposer(new RequestContextVariablesComposer());
     }, []);
 
     // Cachear sin re-render inmediato
@@ -94,17 +102,17 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
 
     useMessageEvent(RoomFurniVariablesMessageEvent, ev => {
         const vars = (ev.parser as any).vars as any[];
-        varsRef.current.user = sortByCreationAsc(vars || []);
+        varsRef.current.furniUser = sortByCreationAsc(vars || []);
         triggerRefresh();
     });
 
     useMessageEvent(RoomInternalFurniVariablesMessageEvent, ev => {
-        varsRef.current.furni = (ev.parser as any).vars;
+        varsRef.current.furniInternal = (ev.parser as any).vars || [];
         triggerRefresh();
     });
 
     useMessageEvent(RoomInternalUserVariablesMessageEvent, ev => {
-        varsRef.current.userInternal = (ev.parser as any).vars;
+        varsRef.current.userInternal = (ev.parser as any).vars || [];
         triggerRefresh();
     });
 
@@ -116,27 +124,39 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
 
     useMessageEvent(RoomGlobalVariablesMessageEvent, ev => {
         const vars = (ev.parser as any).vars as any[];
-        varsRef.current.global = sortByCreationAsc(vars || []);
+        varsRef.current.globalUser = sortByCreationAsc(vars || []);
         triggerRefresh();
     });
 
     useMessageEvent(RoomInternalGlobalVariablesMessageEvent, ev => {
-        varsRef.current.internalGlobal = (ev.parser as any).vars;
+        varsRef.current.globalInternal = (ev.parser as any).vars || [];
+        triggerRefresh();
+    });
+
+    useMessageEvent(RoomContextVariablesMessageEvent, ev => {
+        const vars = (ev.parser as any).vars as any[];
+        varsRef.current.contextUser = sortByCreationAsc(vars || []);
+        triggerRefresh();
+    });
+
+    useMessageEvent(RoomInternalContextVariablesMessageEvent, ev => {
+        const vars = (ev.parser as any).vars as any[];
+        varsRef.current.contextInternal = sortByCreationAsc(vars || []);
         triggerRefresh();
     });
 
     // Lista visible (solo recalcula cuando varsVersion cambia)
     const selectableVars = useMemo(() => {
         const items: any[] = [];
-        const { user, furni, userInternal, userUser, global, internalGlobal } = varsRef.current;
+        const { furniUser, furniInternal, userInternal, userUser, globalUser, globalInternal, contextUser, contextInternal } = varsRef.current;
 
         if (targetType === 0) {
-            user.forEach((v: any) => {
+            furniUser.forEach((v: any) => {
                 v.display = v.name;
                 items.push(v);
             });
             if (showInternal) {
-                furni.forEach((v: any) => {
+                furniInternal.forEach((v: any) => {
                     const dup = items.some(it => it.name === v.name);
                     v.display = dup ? `${v.name} (int)` : v.name;
                     v.hasValue = true; // internal variables have value
@@ -154,15 +174,29 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
                 items.push(v);
             });
         } else if (targetType === 2) {
-            global.forEach((v: any) => {
+            globalUser.forEach((v: any) => {
                 v.display = v.name;
                 items.push(v);
             });
             if (showInternal) {
-                internalGlobal.forEach((v: any) => {
+                globalInternal.forEach((v: any) => {
                     const dup = items.some(it => it.name === v.name);
                     v.display = dup ? `${v.name} (int)` : v.name;
                     v.hasValue = true; // internal variables have value
+                    items.push(v);
+                });
+            }
+        } else if (targetType === 3) {
+            contextUser.forEach((v: any) => {
+                v.display = v.name;
+                items.push(v);
+            });
+
+            if (showInternal) {
+                contextInternal.forEach((v: any) => {
+                    const dup = items.some(it => it.name === v.name);
+                    v.display = dup ? `${v.name} (int)` : v.name;
+                    v.hasValue = (v.hasValue ?? true);
                     items.push(v);
                 });
             }
@@ -179,13 +213,21 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
         if (filterType === 'userCreated') {
             filtered = items.filter(v => v.canCreateDelete);
         } else if (filterType === 'hasValue') {
-            filtered = items.filter(v => v.hasValue && v.canWriteTo);
+            filtered = items.filter(v => v.hasValue && (v.canWriteTo ?? true));
+        }
+
+        if (showOnlyWithValue) {
+            filtered = filtered.filter(v => v.hasValue && (v.canWriteTo ?? true));
         }
 
         return filtered;
-    }, [targetType, varsVersion, showInternal, filterType]);
+    }, [targetType, varsVersion, showInternal, filterType, showOnlyWithValue]);
 
     const selectedDef = useMemo(() => selectableVars.find(v => v.name === selectedVariable), [selectedVariable, selectableVars]);
+
+    useEffect(() => {
+        if(onSelectedDetailsChange) onSelectedDetailsChange(selectedDef || null);
+    }, [selectedDef, onSelectedDetailsChange]);
 
     const handleVariableChange = (value: string) => {
         onVariableChange(value);
@@ -266,7 +308,7 @@ export const VariableSelectorComponent: FC<VariableSelectorComponentProps> = ({
                 ))}
             </select>
 
-            {showAdvancedOptions && targetType !== 2 && (
+            {showAdvancedOptions && targetType !== 2 && targetType !== 3 && (
                 <>
                     <Text bold>Opciones avanzadas</Text>
                     <div className='align-advancedoptionsone'>

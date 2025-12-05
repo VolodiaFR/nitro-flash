@@ -21,6 +21,7 @@ export const WiredActionGiveVariableView: FC = () => {
     const [targetType, setTargetType] = useState(0); // 0 = furni, 1 = user
     const [typeOfAdvancedOption, setTypeOfAdvancedOption] = useState(4); // 4 = Items seleccionados (default)
     const [dbId, setDbId] = useState(0);
+    const [selectedDetails, setSelectedDetails] = useState<any | null>(null);
 
     // Cargar configuración previa
     useEffect(() => {
@@ -38,14 +39,7 @@ export const WiredActionGiveVariableView: FC = () => {
         setTypeOfAdvancedOption(advOpt);
     }, [trigger?.id]);
 
-    // Determinar si la variable seleccionada tiene valor
-    // Nota: Esta lógica podría mejorarse pasando selectedDef desde VariableSelectorComponent
-    const selectedHasValue = true; // Simplificado por ahora
-    
-    useEffect(() => {
-        // Ajustar initialValue basado en si la variable tiene valor
-        // Esta lógica podría mejorarse con comunicación del componente hijo
-    }, [selected]);
+    const selectedHasValue = !!(selectedDetails && selectedDetails.hasValue && (selectedDetails.canWriteTo ?? true));
 
     // Guardar
     const save = () => {
@@ -63,6 +57,7 @@ export const WiredActionGiveVariableView: FC = () => {
                 <VariableSelectorComponent
                     selectedVariable={selected}
                     onVariableChange={setSelected}
+                    onSelectedDetailsChange={setSelectedDetails}
                     targetType={targetType}
                     onTargetTypeChange={setTargetType}
                     typeOfAdvancedOption={typeOfAdvancedOption}

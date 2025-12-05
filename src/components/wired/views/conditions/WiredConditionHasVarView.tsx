@@ -13,7 +13,7 @@ const CUSTOM_ALL_OR_ONE_TEXTS = [
 
 const normalizeTargetType = (value: number): number =>
 {
-    if(value === 1 || value === 2) return value;
+    if(value === 1 || value === 2 || value === 3) return value;
     return 0;
 };
 
@@ -21,6 +21,7 @@ const defaultAdvancedOption = (targetType: number): number =>
 {
     if(targetType === 1) return 0;
     if(targetType === 2) return 0;
+    if(targetType === 3) return 0;
     return 4;
 };
 
@@ -28,6 +29,7 @@ const normalizeAdvancedOption = (targetType: number, option: number): number =>
 {
     if(targetType === 1) return [0, 1, 2].includes(option) ? option : 0;
     if(targetType === 2) return 0;
+    if(targetType === 3) return 0;
     return [3, 4, 5, 6].includes(option) ? option : 4;
 };
 

@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { Column, Flex, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredAddonBaseView } from './WiredAddonBaseView';
+import { LocalizeText } from '../../../../api';
 
 export const WiredAddonContextVariableView: FC = () => {
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
@@ -41,12 +42,9 @@ export const WiredAddonContextVariableView: FC = () => {
                         checked={ hasValue }
                         onChange={ event => setHasValue(event.target.checked) }
                     />
-                    <Text small>Permite almacenar un valor numérico</Text>
+                    <Text>{LocalizeText('wired_var_furni_has_value')}</Text>
                 </Flex>
 
-                <Text small variant='muted'>
-                    Las variables de contexto solo se usan dentro de Wired y se listan en el monitor. No se vinculan a furnis ni usuarios.
-                </Text>
             </Column>
         </WiredAddonBaseView>
     );
