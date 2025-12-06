@@ -32,7 +32,7 @@ export const WiredConditionHasVariableView: FC = () => {
 
     useEffect(() => {
         if(trigger) setSelected(trigger.stringData || '');
-    }, [ trigger?.id ]);
+    }, [ trigger ]);
 
     useMessageEvent<RoomFurniVariablesMessageEvent>(RoomFurniVariablesMessageEvent, event => {
         const parser = event.getParser();

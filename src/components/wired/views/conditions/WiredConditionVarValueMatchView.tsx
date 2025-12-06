@@ -158,7 +158,7 @@ export const WiredConditionVarValueMatchView: FC = () =>
         {
             setAllOrOneOptions(1);
         }
-    }, [ trigger?.id, setAllOrOneOptions ]);
+    }, [ trigger, setAllOrOneOptions ]);
 
     const notify = (message: string) =>
     {

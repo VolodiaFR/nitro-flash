@@ -3,6 +3,7 @@ export class IncomingHeader
     //CUSTOM
     public static ABOUT_ALERT = 2676;
     public static WIRED_SELECTOR = 2669;
+    public static WIRED_CLIPBOARD_STATUS = 6062;
     
 
     public static GET_FURNIFIXTOOL_FURNI_DATA = 2670;

@@ -24,6 +24,9 @@ export class OutgoingHeader
     public static BLACKJACK_HIT = 6033;
     public static BLACKJACK_STAND = 6034;
     public static BLACKJACK_JOIN_QUEUE_WITH_BET = 6035;
+    public static WIRED_CLIPBOARD_COPY = 6054;
+    public static WIRED_CLIPBOARD_PASTE = 6055;
+    public static WIRED_CLIPBOARD_TOGGLE_AUTOPASTE = 6056;
     
     //CUSTOM FURNIFIX / 1 CLICK
     public static CLICK_FURNI = 6002;

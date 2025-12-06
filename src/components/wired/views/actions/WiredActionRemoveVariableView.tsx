@@ -30,7 +30,7 @@ export const WiredActionRemoveVariableView: FC = () => {
         setDbId(dbid);
         setTargetType(targ);
         setTypeOfAdvancedOption(advOpt);
-    }, [trigger?.id]);
+    }, [trigger]);
 
     // Guardar
     const save = () => {

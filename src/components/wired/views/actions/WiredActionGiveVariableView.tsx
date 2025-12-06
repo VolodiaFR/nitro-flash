@@ -37,7 +37,7 @@ export const WiredActionGiveVariableView: FC = () => {
         setDbId(dbid);
         setTargetType(targ);
         setTypeOfAdvancedOption(advOpt);
-    }, [trigger?.id]);
+    }, [trigger]);
 
     const selectedHasValue = !!(selectedDetails && selectedDetails.hasValue && (selectedDetails.canWriteTo ?? true));
 

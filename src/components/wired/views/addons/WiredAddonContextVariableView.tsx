@@ -14,7 +14,7 @@ export const WiredAddonContextVariableView: FC = () => {
         setVarName(trigger.stringData || '');
         const storedHasValue = trigger.intData.length > 0 ? trigger.intData[0] === 1 : false;
         setHasValue(storedHasValue);
-    }, [ trigger?.id ]);
+    }, [ trigger ]);
 
     const save = () => {
         setStringParam?.(varName.trim());

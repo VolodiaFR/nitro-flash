@@ -1,9 +1,48 @@
-import { ConditionDefinition, OpenMessageComposer, Triggerable, TriggerDefinition, UpdateActionMessageComposer, UpdateAddonMessageComposer, UpdateConditionMessageComposer, UpdateSelectorMessageComposer, UpdateTriggerMessageComposer, WiredActionDefinition, WiredAddonDefinition, WiredFurniActionEvent, WiredFurniAddonEvent, WiredFurniConditionEvent, WiredFurniSelectorEvent, WiredFurniTriggerEvent, WiredOpenEvent, WiredSaveSuccessEvent, WiredSelectorDefinition } from '@nitrots/nitro-renderer';
-import { useEffect, useState } from 'react';
+import { ConditionDefinition, CopyWiredConfigMessageComposer, OpenMessageComposer, PasteWiredConfigMessageComposer, SetWiredClipboardAutopasteMessageComposer, Triggerable, TriggerDefinition, UpdateActionMessageComposer, UpdateAddonMessageComposer, UpdateConditionMessageComposer, UpdateSelectorMessageComposer, UpdateTriggerMessageComposer, WiredActionDefinition, WiredAddonDefinition, WiredClipboardStatusAction, WiredClipboardStatusEntry, WiredClipboardStatusMessageEvent, WiredFurniActionEvent, WiredFurniAddonEvent, WiredFurniConditionEvent, WiredFurniSelectorEvent, WiredFurniTriggerEvent, WiredOpenEvent, WiredSaveSuccessEvent, WiredSelectorDefinition } from '@nitrots/nitro-renderer';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
 import { IsOwnerOfFloorFurniture, LocalizeText, SendMessageComposer, WiredFurniType, WiredSelectionVisualizer } from '../../api';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
+
+interface WiredClipboardStatusState
+{
+    action: WiredClipboardStatusAction;
+    success: boolean;
+    message: string;
+}
+
+const cloneTriggerable = <T extends Triggerable>(definition: T): T =>
+{
+    if (!definition) return null as T;
+
+    const clone = Object.create(Object.getPrototypeOf(definition));
+
+    for (const key of Object.getOwnPropertyNames(definition))
+    {
+        const value = (definition as any)[key];
+
+        if (Array.isArray(value))
+        {
+            clone[key] = value.map(item =>
+            {
+                if (item && (typeof item === 'object')) return { ...item };
+
+                return item;
+            });
+        }
+        else if (value && (typeof value === 'object'))
+        {
+            clone[key] = { ...value };
+        }
+        else
+        {
+            clone[key] = value;
+        }
+    }
+
+    return clone as T;
+};
 
 const useWiredState = () =>
 {
@@ -27,7 +66,33 @@ const useWiredState = () =>
     const [selectMode, setSelectMode] = useState<number>(0); // 0 none, 1 source (yellow), 2 dest (blue)
     const [preferredSelectionColor, setPreferredSelectionColor] = useState<number>(0); // 0 = default gray, 1 = yellow (furnitofurni only)
     const [allowYellowSelection, setAllowYellowSelection] = useState<boolean>(false);
-    const { showConfirm = null } = useNotification();
+    const [clipboardEntry, setClipboardEntry] = useState<WiredClipboardStatusEntry>(null);
+    const [clipboardStatus, setClipboardStatus] = useState<WiredClipboardStatusState>(null);
+    const [autoPasteEnabled, setAutoPasteEnabled] = useState<boolean>(false);
+    const [activeStuffId, setActiveStuffId] = useState<number>(null);
+    const initialTriggerRef = useRef<Triggerable>(null);
+    const silentCopyRef = useRef(false);
+    const { showConfirm = null, simpleAlert = null } = useNotification();
+
+    const resetInitialSnapshot = () =>
+    {
+        initialTriggerRef.current = null;
+    };
+
+    const applyTriggerDefinition = useCallback((definition: Triggerable | null) =>
+    {
+        if (definition)
+        {
+            const currentSnapshotId = initialTriggerRef.current?.id;
+
+            if (!initialTriggerRef.current || (currentSnapshotId !== definition.id))
+            {
+                initialTriggerRef.current = cloneTriggerable(definition);
+            }
+        }
+
+        setTrigger(definition);
+    }, []);
 
     const saveWired = () =>
     {
@@ -72,9 +137,71 @@ const useWiredState = () =>
         }
     };
 
+    const copyWiredClipboard = useCallback((silent = false) =>
+    {
+        if (!trigger) return;
+
+        if (silent) silentCopyRef.current = true;
+
+        SendMessageComposer(new CopyWiredConfigMessageComposer(trigger.id));
+    }, [trigger]);
+
+    const pasteWiredClipboard = useCallback(() =>
+    {
+        if (!trigger) return;
+
+        SendMessageComposer(new PasteWiredConfigMessageComposer(trigger.id));
+    }, [trigger]);
+
+    const setClipboardAutoPaste = useCallback((enabled: boolean) =>
+    {
+        setAutoPasteEnabled(enabled);
+        SendMessageComposer(new SetWiredClipboardAutopasteMessageComposer(enabled));
+    }, []);
+
+    useEffect(() =>
+    {
+        if (!autoPasteEnabled || !trigger) return;
+
+        copyWiredClipboard(true);
+    }, [autoPasteEnabled, trigger, copyWiredClipboard]);
+
+    const clearFurniSelection = () =>
+    {
+        setFurniIds(prevValue =>
+        {
+            if (prevValue && prevValue.length) WiredSelectionVisualizer.clearSelectionShaderFromFurni(prevValue);
+
+            return [];
+        });
+
+        setDestFurniIds(prevValue =>
+        {
+            if (prevValue && prevValue.length) WiredSelectionVisualizer.clearSelectionShaderFromFurniBlue(prevValue);
+
+            return [];
+        });
+    };
+
+    const reloadCurrentWired = useCallback(() =>
+    {
+        if (initialTriggerRef.current && trigger && (initialTriggerRef.current.id === trigger.id))
+        {
+            setTrigger(cloneTriggerable(initialTriggerRef.current));
+            return;
+        }
+
+        const stuffId = activeStuffId ?? trigger?.id;
+
+        if (!stuffId) return;
+
+        SendMessageComposer(new OpenMessageComposer(stuffId));
+    }, [activeStuffId, trigger]);
+
     const selectObjectForWired = (objectId: number, category: number) =>
     {
         if (!trigger || !allowsFurni) return;
+        if (autoPasteEnabled) return;
         if (objectId <= 0) return;
 
         // if selectMode is 0 -> default (source/yellow), 1 -> source (yellow), 2 -> destination (blue)
@@ -161,50 +288,85 @@ const useWiredState = () =>
     {
         const parser = event.getParser();
 
+        resetInitialSnapshot();
+        setActiveStuffId(parser.stuffId);
         SendMessageComposer(new OpenMessageComposer(parser.stuffId));
     });
 
-    useMessageEvent<WiredSaveSuccessEvent>(WiredSaveSuccessEvent, event =>
+    useMessageEvent<WiredSaveSuccessEvent>(WiredSaveSuccessEvent, () =>
     {
-        const parser = event.getParser();
-
-        setTrigger(null);
+        resetInitialSnapshot();
+        setActiveStuffId(null);
+        applyTriggerDefinition(null);
     });
     
     useMessageEvent<WiredFurniSelectorEvent>(WiredFurniSelectorEvent, event =>
     {
         const parser = event.getParser();
 
-        setTrigger(parser.definition);
+        applyTriggerDefinition(parser.definition);
     });
     
     useMessageEvent<WiredFurniAddonEvent>(WiredFurniAddonEvent, event =>
     {
         const parser = event.getParser();
 
-        setTrigger(parser.definition);
+        applyTriggerDefinition(parser.definition);
     });
 
     useMessageEvent<WiredFurniActionEvent>(WiredFurniActionEvent, event =>
     {
         const parser = event.getParser();
 
-        setTrigger(parser.definition);
+        applyTriggerDefinition(parser.definition);
     });
 
     useMessageEvent<WiredFurniConditionEvent>(WiredFurniConditionEvent, event =>
     {
         const parser = event.getParser();
 
-        setTrigger(parser.definition);
+        applyTriggerDefinition(parser.definition);
     });
 
     useMessageEvent<WiredFurniTriggerEvent>(WiredFurniTriggerEvent, event =>
     {
         const parser = event.getParser();
 
-        setTrigger(parser.definition);
+        applyTriggerDefinition(parser.definition);
     });
+
+    useMessageEvent<WiredClipboardStatusMessageEvent>(WiredClipboardStatusMessageEvent, event =>
+    {
+        const parser = event.getParser();
+
+        setClipboardEntry(parser.entry);
+        setClipboardStatus({ action: parser.action, success: parser.success, message: parser.feedback });
+        setAutoPasteEnabled(parser.autoPasteEnabled);
+        const suppressCopyAlert = (parser.action === WiredClipboardStatusAction.COPY) && silentCopyRef.current;
+
+        if (suppressCopyAlert) silentCopyRef.current = false;
+
+        if (!suppressCopyAlert && (parser.action !== WiredClipboardStatusAction.AUTO_PASTE) && simpleAlert && parser.feedback)
+        {
+            // simpleAlert(parser.feedback, null, null, null, LocalizeText('wiredfurni.title'));
+        }
+
+    });
+
+    useEffect(() =>
+    {
+        if (trigger || !autoPasteEnabled) return;
+
+        setClipboardAutoPaste(false);
+    }, [trigger, autoPasteEnabled, setClipboardAutoPaste]);
+
+    useEffect(() =>
+    {
+        if (trigger) return;
+
+        setActiveStuffId(null);
+        resetInitialSnapshot();
+    }, [trigger]);
 
     useEffect(() =>
     {
@@ -246,7 +408,7 @@ const useWiredState = () =>
         };
     }, [trigger]);
 
-    return { trigger, setTrigger, intParams, setIntParams, stringParam, setStringParam, furniIds, setFurniIds, destFurniIds, setDestFurniIds, actionDelay, setActionDelay,isFiltered, setIsFiltered, isInverted, setIsInverted, furniOptions, setFurniOptions, furniType, setFurniType,userOptions,setUserOptions,userType,setUserType, selectMode, setSelectMode, setAllowsFurni, saveWired, selectObjectForWired, allOrOneOptions, setAllOrOneOptions, allOrOneType, setAllOrOneType, preferredSelectionColor, setPreferredSelectionColor, allowYellowSelection, setAllowYellowSelection };
+    return { trigger, setTrigger, intParams, setIntParams, stringParam, setStringParam, furniIds, setFurniIds, destFurniIds, setDestFurniIds, actionDelay, setActionDelay, isFiltered, setIsFiltered, isInverted, setIsInverted, furniOptions, setFurniOptions, furniType, setFurniType, userOptions, setUserOptions, userType, setUserType, selectMode, setSelectMode, setAllowsFurni, saveWired, selectObjectForWired, allOrOneOptions, setAllOrOneOptions, allOrOneType, setAllOrOneType, preferredSelectionColor, setPreferredSelectionColor, allowYellowSelection, setAllowYellowSelection, clipboardEntry, clipboardStatus, autoPasteEnabled, copyWiredClipboard, pasteWiredClipboard, setClipboardAutoPaste, clearFurniSelection, reloadCurrentWired };
 };
 
 export const useWired = () => useBetween(useWiredState);

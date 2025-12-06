@@ -3,6 +3,7 @@ export * from './WiredFurniAddonEvent';
 export * from './WiredFurniConditionEvent';
 export * from './WiredFurniSelectorEvent';
 export * from './WiredFurniTriggerEvent';
+export * from './WiredClipboardStatusMessageEvent';
 export * from './WiredOpenEvent';
 export * from './WiredRewardResultMessageEvent';
 export * from './WiredSaveSuccessEvent';

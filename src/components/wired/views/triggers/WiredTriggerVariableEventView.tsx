@@ -37,7 +37,7 @@ export const WiredTriggerVariableEventView: FC = () => {
 
         const storedAdvanced = (trigger.intData.length > 2) ? trigger.intData[2] : 0;
         setAdvancedOption(storedAdvanced);
-    }, [trigger?.id]);
+    }, [trigger]);
 
     useEffect(() => {
         if (targetType === 3) {

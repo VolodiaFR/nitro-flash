@@ -59,7 +59,7 @@ export const WiredActionChangeValueVariableView: FC = () => {
     if (trigger.intData.length >= 7) {
       setTypeOfAdvancedOptionTwo(trigger.intData[6] ?? 4);
     }
-  }, [trigger?.id]);
+  }, [trigger]);
 
   // Guardar
   const save = () => {

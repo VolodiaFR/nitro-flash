@@ -8,6 +8,7 @@ export * from './WiredFurniAddonParser';
 export * from './WiredFurniConditionParser';
 export * from './WiredFurniSelectorParser';
 export * from './WiredFurniTriggerParser';
+export * from './WiredClipboardStatusMessageParser';
 export * from './WiredOpenParser';
 export * from './WiredRewardResultMessageParser';
 export * from './WiredSaveSuccessParser';
