@@ -6,9 +6,9 @@ import { InspectUserVariablesComposer } from '@nitrots/nitro-renderer/src/nitro/
 import { ToggleFurniInspectionLockComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/ToggleFurniInspectionLockComposer';
 import { ToggleGlobalInspectionComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/ToggleGlobalInspectionComposer';
 import { ToggleUserInspectionLockComposer } from '@nitrots/nitro-renderer/src/nitro/communication/messages/outgoing/room/variables/ToggleUserInspectionLockComposer';
-import { FC, useEffect, useRef, useState } from 'react';
-import { GetFurnitureData, GetRoomSession, SendMessageComposer } from '../../api';
-import { Button, Text, Flex, LayoutRoomPreviewerView } from '../../common';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { GetRoomEngine, GetRoomSession, SendMessageComposer } from '../../api';
+import { Button, Text, Flex, LayoutAvatarImageView } from '../../common';
 import { useMessageEvent, useRoomEngineEvent } from '../../hooks';
 import './WiredMonitorView.scss';
 
@@ -26,6 +26,7 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
     const [globalVariables, setGlobalVariables] = useState<Map<string, string>>(new Map());
     const [selectedFurniId, setSelectedFurniId] = useState<number | null>(null);
     const [selectedEntityId, setSelectedEntityId] = useState<number | null>(null);
+    const [furniPreviewUrl, setFurniPreviewUrl] = useState<string | null>(null);
     const [keepSelected, setKeepSelected] = useState(false);
     const [lockedTarget, setLockedTarget] = useState<InspectorTarget | null>(null);
     const [changedFurni, setChangedFurni] = useState<Set<string>>(new Set());
@@ -33,7 +34,7 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
     const [changedGlobal, setChangedGlobal] = useState<Set<string>>(new Set());
     const changedTimeouts = useRef<Map<string, any>>(new Map());
     const selectedFurniIdRef = useRef<number | null>(null);
-    const furniPreviewVirtualIdRef = useRef<number | null>(null);
+    const selectedFurniObjectIdRef = useRef<number | null>(null);
     const selectedEntityIdRef = useRef<number | null>(null);
     const entityPreviewFigureRef = useRef<string | null>(null);
     const entityPreviewTypeRef = useRef<string | null>(null);
@@ -44,6 +45,55 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
     const currentChanged = (activeTarget === 'entity') ? changedEntity : (activeTarget === 'global' ? changedGlobal : changedFurni);
     const hasSelection = (activeTarget === 'entity') ? (selectedEntityId !== null) : (activeTarget === 'furni' ? (selectedFurniId !== null) : false);
     const canUseSelectionLock = (activeTarget !== 'global');
+
+    const renderFurniPreview = useCallback((objectIdOverride?: number, preferredCategory?: number) => {
+        const targetObjectId = objectIdOverride ?? selectedFurniObjectIdRef.current;
+
+        if (!targetObjectId) return;
+
+        const roomSession = GetRoomSession();
+        const roomEngine = GetRoomEngine();
+
+        if (!roomSession || !roomEngine) {
+            setFurniPreviewUrl(null);
+            return;
+        }
+
+        const tryGetImage = (category: number) => {
+            const scales = [64, 1];
+
+            for (const scale of scales) {
+                const imageResult = roomEngine.getRoomObjectImage(roomSession.roomId, targetObjectId, category, new Vector3d(180), scale, null);
+
+                if (!imageResult) continue;
+
+                const image = imageResult.getImage();
+
+                if (image?.src?.length) return image.src;
+            }
+
+            return null;
+        };
+
+        const categoriesToTry: number[] = [];
+
+        if (preferredCategory !== undefined) categoriesToTry.push(preferredCategory);
+
+        if (!categoriesToTry.includes(RoomObjectCategory.FLOOR)) categoriesToTry.push(RoomObjectCategory.FLOOR);
+        if (!categoriesToTry.includes(RoomObjectCategory.WALL)) categoriesToTry.push(RoomObjectCategory.WALL);
+
+        let nextUrl: string = null;
+
+        for (const category of categoriesToTry) {
+            nextUrl = tryGetImage(category);
+            if (nextUrl) {
+                selectedFurniObjectIdRef.current = targetObjectId;
+                break;
+            }
+        }
+
+        setFurniPreviewUrl(nextUrl ?? null);
+    }, []);
 
     const enableGlobalInspection = () => {
         SendMessageComposer(new ToggleGlobalInspectionComposer(true));
@@ -69,19 +119,7 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
         else SendMessageComposer(new ToggleUserInspectionLockComposer(false));
     };
 
-    const renderFurniPreview = (virtualId: number | null) => {
-        if (!roomPreviewer || !virtualId) return;
-
-        const stuffData = GetFurnitureData(virtualId, 's');
-
-        if (!stuffData) return;
-
-        roomPreviewer.reset(false);
-        roomPreviewer.updateObjectRoom('101', '101', '1.1');
-        roomPreviewer.updateRoomWallsAndFloorVisibility(true, true);
-        roomPreviewer.addFurnitureIntoRoom(virtualId, new Vector3d(90), stuffData as any, '');
-        roomPreviewer.updatePreviewRoomView();
-    };
+    
 
     const looksLikePetFigure = (figure: string) => {
         const normalized = figure.toLowerCase();
@@ -133,7 +171,7 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
         }
 
         if (target === 'furni') {
-            if (furniPreviewVirtualIdRef.current) renderFurniPreview(furniPreviewVirtualIdRef.current);
+            if (selectedFurniObjectIdRef.current) renderFurniPreview();
             else roomPreviewer?.reset(false);
 
             return;
@@ -178,7 +216,6 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
 
         const furniChanged = selectedFurniIdRef.current !== parser.furniId;
         selectedFurniIdRef.current = parser.furniId;
-        furniPreviewVirtualIdRef.current = parser.virtualId;
 
         setSelectedFurniId(prev => (prev === parser.furniId ? prev : parser.furniId));
         setFurniVariables(new Map(parser.variables));
@@ -203,7 +240,7 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
             });
         }
 
-        if (furniChanged && activeTarget === 'furni') renderFurniPreview(parser.virtualId);
+        if (activeTarget === 'furni') renderFurniPreview();
     });
 
     useMessageEvent<GetUserVariablesAndValuesMessageEvent>(GetUserVariablesAndValuesMessageEvent, event => {
@@ -276,22 +313,33 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
     });
 
     useRoomEngineEvent<RoomEngineObjectEvent>(RoomEngineObjectEvent.SELECTED, event => {
-        if (event.category !== RoomObjectCategory.UNIT || activeTarget !== 'entity') return;
-        if (keepSelected && (lockedTarget === 'entity') && (selectedEntityIdRef.current !== null)) return;
+        if (event.category === RoomObjectCategory.UNIT) {
+            if (activeTarget !== 'entity') return;
+            if (keepSelected && (lockedTarget === 'entity') && (selectedEntityIdRef.current !== null)) return;
 
-        const session = GetRoomSession();
+            const session = GetRoomSession();
 
-        if (!session) return;
+            if (!session) return;
 
-        const userData = session.userDataManager?.getUserDataByIndex(event.objectId);
+            const userData = session.userDataManager?.getUserDataByIndex(event.objectId);
 
-        if (!userData) return;
+            if (!userData) return;
 
-        if (userData.type === RoomObjectUserType.getTypeNumber(RoomObjectUserType.PET)) entityPreviewTypeRef.current = 'PET';
-        else if (userData.type === RoomObjectUserType.getTypeNumber(RoomObjectUserType.BOT)) entityPreviewTypeRef.current = 'BOT';
-        else entityPreviewTypeRef.current = 'PLAYER';
+            if (userData.type === RoomObjectUserType.getTypeNumber(RoomObjectUserType.PET)) entityPreviewTypeRef.current = 'PET';
+            else if (userData.type === RoomObjectUserType.getTypeNumber(RoomObjectUserType.BOT)) entityPreviewTypeRef.current = 'BOT';
+            else entityPreviewTypeRef.current = 'PLAYER';
 
-        SendMessageComposer(new InspectUserVariablesComposer(userData.webID));
+            SendMessageComposer(new InspectUserVariablesComposer(userData.webID));
+            return;
+        }
+
+        if ((event.category === RoomObjectCategory.FLOOR) || (event.category === RoomObjectCategory.WALL)) {
+            if (activeTarget !== 'furni') return;
+            if (keepSelected && (lockedTarget === 'furni') && (selectedFurniIdRef.current !== null)) return;
+
+            selectedFurniObjectIdRef.current = event.objectId;
+            renderFurniPreview(event.objectId, event.category);
+        }
     });
 
     useEffect(() => {
@@ -309,6 +357,21 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
             setLockedTarget(null);
         }
     }, [keepSelected, lockedTarget, selectedFurniId, selectedEntityId]);
+
+    useEffect(() => {
+        if (selectedFurniId === null) {
+            selectedFurniObjectIdRef.current = null;
+            setFurniPreviewUrl(null);
+        }
+    }, [selectedFurniId]);
+
+    useEffect(() => {
+        if (activeTarget !== 'furni') return;
+        if (!selectedFurniId) return;
+        if (!selectedFurniObjectIdRef.current) return;
+
+        renderFurniPreview();
+    }, [activeTarget, selectedFurniId, renderFurniPreview]);
 
     useEffect(() => {
         lockedTargetRef.current = lockedTarget;
@@ -355,8 +418,29 @@ export const InspectionTabView: FC<InspectionTabViewProps> = props => {
                             </Flex>
                             <Flex column style={{ width: '100%' }}>
 
-                                {activeTarget !== 'global' && <LayoutRoomPreviewerView isMonitorWired={true} roomPreviewer={roomPreviewer} height={240} />}
-                                {activeTarget === 'global' && <div className='global-var-inspector' ></div>}
+                                {activeTarget === 'furni' && (
+                                    <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', border: '1px solid #ccc' }}>
+                                        {selectedFurniId ? (
+                                            furniPreviewUrl ? (
+                                                <img src={furniPreviewUrl} alt="Furni" style={{ maxHeight: '240px', maxWidth: '100%' }} />
+                                            ) : (
+                                                'Rendering furni...'
+                                            )
+                                        ) : (
+                                            'Select a furni'
+                                        )}
+                                    </div>
+                                )}
+                                {activeTarget === 'entity' && (
+                                    <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', border: '1px solid #ccc' }}>
+                                        {selectedEntityId ? (
+                                            <LayoutAvatarImageView figure={entityPreviewFigureRef.current} direction={4} />
+                                        ) : (
+                                            'Select a user'
+                                        )}
+                                    </div>
+                                )}
+                                {activeTarget === 'global' && <div className='global-var-inspector'></div>}
                             </Flex>
 
                         </Flex>

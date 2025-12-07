@@ -228,7 +228,7 @@ export const WiredMonitorView: FC<{}> = props => {
                     })}
                 </NitroCardTabsView>
                 <Flex center className='header-monitor-banner'>
-                    <Text className='text-header-monitor'>{getHeaderText(currentTab)}</Text>
+                    <Text className='text-header-monitor ubuntu-bold'>{getHeaderText(currentTab)}</Text>
                 </Flex>
                 <NitroCardContentView>
                     {(currentTab === TAB_VARIABLES) &&
