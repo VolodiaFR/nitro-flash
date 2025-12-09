@@ -5,7 +5,7 @@ import { UserWithVariablesMessageEvent } from '@nitrots/nitro-renderer/src/nitro
 import { RoomObjectVariable } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GetRoomEngine } from '../../../../api';
-import { WiredSelectionVisualizer } from '../../../../api/wired/WiredSelectionVisualizer';
+import { VariableHighlightVisualizer } from '../../../../api/wired/VariableHighlightVisualizer';
 import { useMessageEvent } from '../../../events';
 import { useRoom } from '../../useRoom';
 
@@ -98,7 +98,7 @@ const useVariableHighlightState = () => {
         if (activeHighlight) {
             activeHighlight.furniAssignments.forEach(assignment => {
                 const objectId = getAssignmentObjectId(assignment);
-                if(objectId !== undefined && objectId !== null) WiredSelectionVisualizer.hide(objectId);
+                if(objectId !== undefined && objectId !== null) VariableHighlightVisualizer.hide(objectId);
             });
         }
 
@@ -128,7 +128,7 @@ const useVariableHighlightState = () => {
             // Apply visual highlights
             newHighlight.furniAssignments.forEach(assignment => {
                 const objectId = getAssignmentObjectId(assignment);
-                if(objectId !== undefined && objectId !== null) WiredSelectionVisualizer.show(objectId);
+                if(objectId !== undefined && objectId !== null) VariableHighlightVisualizer.show(objectId);
             });
 
             setActiveHighlight(newHighlight);
@@ -143,7 +143,7 @@ const useVariableHighlightState = () => {
         if (activeHighlight && activeHighlight.furniAssignments.length > 0) {
             activeHighlight.furniAssignments.forEach(assignment => {
                 const objectId = getAssignmentObjectId(assignment);
-                if(objectId !== undefined && objectId !== null) WiredSelectionVisualizer.hide(objectId);
+                if(objectId !== undefined && objectId !== null) VariableHighlightVisualizer.hide(objectId);
             });
         }
 
@@ -181,7 +181,7 @@ const useVariableHighlightState = () => {
         if (activeHighlight) {
             activeHighlight.furniAssignments.forEach(assignment => {
                 const objectId = getAssignmentObjectId(assignment);
-                if(objectId !== undefined && objectId !== null) WiredSelectionVisualizer.hide(objectId);
+                if(objectId !== undefined && objectId !== null) VariableHighlightVisualizer.hide(objectId);
             });
             setActiveHighlight(null);
         }
