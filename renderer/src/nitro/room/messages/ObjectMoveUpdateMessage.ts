@@ -3,18 +3,15 @@ import { RoomObjectUpdateMessage } from '../../../room';
 
 export class ObjectMoveUpdateMessage extends RoomObjectUpdateMessage
 {
-    public static DEFAULT_ANIMATION_TIME: number = 500;
     private _targetLocation: IVector3D;
     private _isSlide: boolean;
-    private _animationTime: number;
 
-    constructor(location: IVector3D, targetLocation: IVector3D, direction: IVector3D, isSlide: boolean = false, animationTime: number = ObjectMoveUpdateMessage.DEFAULT_ANIMATION_TIME)
+    constructor(location: IVector3D, targetLocation: IVector3D, direction: IVector3D, isSlide: boolean = false)
     {
         super(location, direction);
 
         this._targetLocation = targetLocation;
         this._isSlide = isSlide;
-        this._animationTime = animationTime;
     }
 
     public get targetLocation(): IVector3D
@@ -29,8 +26,4 @@ export class ObjectMoveUpdateMessage extends RoomObjectUpdateMessage
         return this._isSlide;
     }
 
-    public get animationTime(): number
-    {
-        return this._animationTime;
-    }
 }

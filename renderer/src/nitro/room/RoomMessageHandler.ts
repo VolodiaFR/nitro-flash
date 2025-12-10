@@ -618,7 +618,7 @@ export class RoomMessageHandler extends Disposable
 
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
-        const animationTime = parser.animationTime || 500;
+
 
         if (!itemSlides || itemSlides.length === 0) return;
 
@@ -636,7 +636,6 @@ export class RoomMessageHandler extends Disposable
                 slide.virtualId,
                 from,
                 to,
-                animationTime
             );
 
             // Actualizar la rotación si cambió
@@ -654,8 +653,6 @@ export class RoomMessageHandler extends Disposable
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
         const userSlides = parser.userSlides;
-        const animationTime = parser.animationTime || 500;
-
         // Procesar items
         if (itemSlides && itemSlides.length > 0) {
             for (const slide of itemSlides) 
@@ -671,7 +668,6 @@ export class RoomMessageHandler extends Disposable
                     slide.virtualId,
                     from,
                     to,
-                    animationTime
                 );
 
                 // Actualizar la rotación si cambió
@@ -691,18 +687,15 @@ export class RoomMessageHandler extends Disposable
                 const from: IVector3D = new Vector3d(slide.fromX, slide.fromY, parseFloat(slide.fromZ));
                 const to: IVector3D = new Vector3d(slide.toX, slide.toY, parseFloat(slide.toZ));
 
-                // Usar updateRoomObjectUserLocation para animar el movimiento del user sin cambiar rotación
                 this._roomCreator.updateRoomObjectUserLocation(
                     this._currentRoomId,
                     slide.roomIndex,
                     from,
                     to,
-                    true, // canStandUp
-                    0, // baseY
-                    null, // direction (no cambiar)
-                    NaN, // headDirection (no cambiar)
-                    animationTime,
-                    true
+                    true,
+                    0,
+                    null,
+                    NaN,
                 );
             }
         }
