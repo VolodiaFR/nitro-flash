@@ -128,10 +128,19 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         this._locationDelta.assign(message.targetLocation);
         this._locationDelta.subtract(this._location);
-        // If the incoming message provides an update interval (animation duration), use it
+        // Set update interval behavior:
+        // - If an explicit positive updateInterval is provided, use it.
+        // - If updateInterval === 0, treat as immediate (use 1ms to finish quickly).
+        // - If no updateInterval is provided, reset to the default so normal walking uses default timing.
         if(typeof message.updateInterval !== 'undefined' && message.updateInterval !== null)
         {
-            this.updateInterval = message.updateInterval;
+            if(message.updateInterval > 0) this.updateInterval = message.updateInterval;
+            else this.updateInterval = 1; // immediate
+        }
+        else
+        {
+            // No custom interval provided -> ensure we use the default interval (e.g. 500ms)
+            this.updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
         }
     }
 
