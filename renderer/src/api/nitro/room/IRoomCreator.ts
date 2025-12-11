@@ -3,8 +3,7 @@ import { IRoomSessionManager, ISessionDataManager } from '../session';
 import { IObjectData, IRoomMapData } from './object';
 import { IFurnitureStackingHeightMap, ILegacyWallGeometry } from './utils';
 
-export interface IRoomCreator
-{
+export interface IRoomCreator {
     destroyRoom(id: number): void;
     getRoomInstance(roomId: number): IRoomInstance;
     updateRoomInstancePlaneVisibility(roomId: number, wallVisible: boolean, floorVisible?: boolean): boolean;
@@ -51,4 +50,19 @@ export interface IRoomCreator
     setRoomEngineGameMode(roomId: number, isPlaying: boolean): void;
     sessionDataManager: ISessionDataManager;
     roomSessionManager: IRoomSessionManager;
+    rollRoomObjectUser(
+        roomId: number,
+        virtualId: number,
+        fromX: number,
+        fromY: number,
+        fromZ: number,
+        toX: number,
+        toY: number,
+        toZ: number,
+        fromStatus: string,
+        toStatus: string,
+        fromRotation: number,
+        toRotation: number
+
+    ): void;
 }

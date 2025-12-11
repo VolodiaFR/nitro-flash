@@ -506,7 +506,7 @@ export class IncomingHeader
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
     public static BULK_UPDATE_FLOOR_ITEMS = 5300;
-    public static BULK_SLIDE_ITEMS = 5301;
+    public static BULK_SLIDE_ITEMS_USERS = 5301;
     public static BULK_HEIGHT_MAP_UPDATE = 5302;
     public static BULK_SLIDE_USERS_AND_ITEMS = 5303;
 }

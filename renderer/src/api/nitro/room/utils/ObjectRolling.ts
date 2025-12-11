@@ -14,6 +14,7 @@ export class ObjectRolling
     {
         this._id = id;
         this._location = location;
+        console.log(location)
         this._targetLocation = targetLocation;
         this._movementType = movementType;
     }

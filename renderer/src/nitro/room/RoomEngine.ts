@@ -2085,7 +2085,7 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
             if(instanceData) instanceData.setUserFocusAlpha(objectId, focusAlpha);
         }
 
-        object.processUpdateMessage(new ObjectAvatarUpdateMessage(this.fixedUserLocation(roomId, location), null, direction, headDirection, false, 0, false, ObjectMoveUpdateMessage.DEFAULT_ANIMATION_TIME));
+        object.processUpdateMessage(new ObjectAvatarUpdateMessage(this.fixedUserLocation(roomId, location), null, direction, headDirection, false, 0, false));
 
         if(figure) object.processUpdateMessage(new ObjectAvatarFigureUpdateMessage(figure));
 
