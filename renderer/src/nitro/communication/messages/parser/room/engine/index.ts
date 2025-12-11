@@ -4,3 +4,4 @@ export * from './ObjectData';
 export * from './ObjectsDataUpdateParser';
 export * from './ObjectsRollingParser';
 export * from './BulkSlideUsersItemsParser'
+export * from './BulkSlideItemsParser'

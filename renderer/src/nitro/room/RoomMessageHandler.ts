@@ -1,6 +1,6 @@
 import { AvatarGuideStatus, IConnection, IRoomCreator, IVector3D, LegacyDataType, ObjectRolling, PetType, RoomObjectType, RoomObjectUserType, RoomObjectVariable, Vector3d } from '../../api';
 import { Disposable } from '../../core';
-import { BulkHeightMapUpdateEvent, BulkSlideUsersItemsEvent, BulkUpdateFloorItemsEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, PetExperienceEvent, PetFigureUpdateEvent, PlayerOnClickThroughEvent, PlayerVimKeysEvent, PlayerWalkKeysEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomSpotlightOverlayEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUnitFocusEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, YouArePlayingGameEvent } from '../communication';
+import { BulkHeightMapUpdateEvent, BulkSlideItemsEvent, BulkSlideUsersItemsEvent, BulkUpdateFloorItemsEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, PetExperienceEvent, PetFigureUpdateEvent, PlayerOnClickThroughEvent, PlayerVimKeysEvent, PlayerWalkKeysEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUnitFocusEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, YouArePlayingGameEvent } from '../communication';
 import { RoomPlaneParser } from './object/RoomPlaneParser';
 import { RoomVariableEnum } from './RoomVariableEnum';
 import { FurnitureStackingHeightMap, LegacyWallGeometry } from './utils';
@@ -73,7 +73,8 @@ export class RoomMessageHandler extends Disposable
         this._connection.addMessageEvent(new FurnitureFloorRemoveEvent(this.onFurnitureFloorRemoveEvent.bind(this)));
         this._connection.addMessageEvent(new FurnitureFloorUpdateEvent(this.onFurnitureFloorUpdateEvent.bind(this)));
         this._connection.addMessageEvent(new BulkUpdateFloorItemsEvent(this.onBulkUpdateFloorItemsEvent.bind(this)));
-        this._connection.addMessageEvent(new BulkSlideUsersItemsEvent(this.onBulkSlideUsersItemsEvent.bind(this)));
+        this._connection.addMessageEvent(new BulkSlideItemsEvent(this.onBulkSlideItemsEvent.bind(this)));
+        this._connection.addMessageEvent(new BulkSlideUsersItemsEvent(this.onBulkSlideUsersAndItemsEvent.bind(this)));
         this._connection.addMessageEvent(new FurnitureWallAddEvent(this.onFurnitureWallAddEvent.bind(this)));
         this._connection.addMessageEvent(new FurnitureWallEvent(this.onFurnitureWallEvent.bind(this)));
         this._connection.addMessageEvent(new FurnitureWallRemoveEvent(this.onFurnitureWallRemoveEvent.bind(this)));
@@ -85,7 +86,6 @@ export class RoomMessageHandler extends Disposable
         this._connection.addMessageEvent(new RoomUnitEffectEvent(this.onRoomUnitEffectEvent.bind(this)));
         this._connection.addMessageEvent(new RoomUnitEvent(this.onRoomUnitEvent.bind(this)));
         this._connection.addMessageEvent(new RoomUnitFocusEvent(this.onRoomUnitFocusEvent.bind(this)));
-        this._connection.addMessageEvent(new RoomSpotlightOverlayEvent(this.onRoomSpotlightOverlayEvent.bind(this)));
         this._connection.addMessageEvent(new RoomUnitExpressionEvent(this.onRoomUnitExpressionEvent.bind(this)));
         this._connection.addMessageEvent(new RoomUnitHandItemEvent(this.onRoomUnitHandItemEvent.bind(this)));
         this._connection.addMessageEvent(new RoomUnitIdleEvent(this.onRoomUnitIdleEvent.bind(this)));
@@ -436,7 +436,7 @@ export class RoomMessageHandler extends Disposable
 
     private onRoomRollingEvent(event: ObjectsRollingEvent): void
     {
-        if(!(event instanceof ObjectsRollingEvent) || !event.connection || !this._roomCreator) return;
+        if (!(event instanceof ObjectsRollingEvent) || !event.connection || !this._roomCreator) return;
 
         const parser = event.getParser();
 
@@ -445,29 +445,43 @@ export class RoomMessageHandler extends Disposable
 
         const furnitureRolling = parser.itemsRolling;
 
-        if(furnitureRolling && furnitureRolling.length)
+        if (furnitureRolling && furnitureRolling.length)
         {
-            for(const rollData of furnitureRolling)
+            for (const rollData of furnitureRolling)
             {
-                if(!rollData) continue;
+                if (!rollData) continue;
 
-                this._roomCreator.rollRoomObjectFloor(this._currentRoomId, rollData.id, rollData.location, rollData.targetLocation);
+                this._roomCreator.rollRoomObjectFloor(
+                    this._currentRoomId,
+                    rollData.id,
+                    rollData.location,
+                    rollData.targetLocation,
+                );
             }
         }
 
         const unitRollData = parser.unitRolling;
 
-        if(unitRollData)
+        if (unitRollData)
         {
-            this._roomCreator.updateRoomObjectUserLocation(this._currentRoomId, unitRollData.id, unitRollData.location, unitRollData.targetLocation);
+            this._roomCreator.updateRoomObjectUserLocation(
+                this._currentRoomId,
+                unitRollData.id,
+                unitRollData.location, // location (3er parámetro)
+                unitRollData.targetLocation, // targetLocation (4to)
+                false, // canStandUp (5to) - valor por defecto: false
+                0, // baseY (6to) - valor por defecto: 0
+                null, // direction (7mo) - valor por defecto: null
+                NaN, // headDirection (8vo) - valor por defecto: NaN
+            );
 
             const object = this._roomCreator.getRoomObjectUser(this._currentRoomId, unitRollData.id);
 
-            if(object && object.type !== RoomObjectUserType.MONSTER_PLANT)
+            if (object && object.type !== RoomObjectUserType.MONSTER_PLANT)
             {
                 let posture = 'std';
 
-                switch(unitRollData.movementType)
+                switch (unitRollData.movementType)
                 {
                     case ObjectRolling.MOVE:
                         posture = 'mv';
@@ -481,6 +495,7 @@ export class RoomMessageHandler extends Disposable
             }
         }
     }
+
     private onObjectsDataUpdateEvent(event: ObjectsDataUpdateEvent): void
     {
         if (!(event instanceof ObjectsDataUpdateEvent) || !event.connection || !this._roomCreator) return;
@@ -596,13 +611,12 @@ export class RoomMessageHandler extends Disposable
         }
     }
 
-    private onBulkSlideUsersItemsEvent(event: BulkSlideUsersItemsEvent): void
+    private onBulkSlideItemsEvent(event: BulkSlideItemsEvent): void
     {
-        if (!(event instanceof BulkSlideUsersItemsEvent) || !event.connection || !this._roomCreator) return;
+        if (!(event instanceof BulkSlideItemsEvent) || !event.connection || !this._roomCreator) return;
 
         const parser = event.getParser();
         const itemSlides = parser.itemSlides;
-        const playerSlides = parser.playerSlides;
 
         if (!itemSlides || itemSlides.length === 0) return;
 
@@ -613,12 +627,13 @@ export class RoomMessageHandler extends Disposable
 
             const from: IVector3D = new Vector3d(slide.fromX, slide.fromY, parseFloat(slide.fromZ));
             const to: IVector3D = new Vector3d(slide.toX, slide.toY, parseFloat(slide.toZ));
+
             // Usar rollRoomObjectFloor para animar el movimiento
             this._roomCreator.rollRoomObjectFloor(
                 this._currentRoomId,
                 slide.virtualId,
                 from,
-                to,
+                to
             );
 
             // Actualizar la rotación si cambió
@@ -627,30 +642,64 @@ export class RoomMessageHandler extends Disposable
                 this._roomCreator.updateRoomObjectFloor(this._currentRoomId, slide.virtualId, null, direction, null, null);
             }
         }
+    }
 
-        for (const slide of playerSlides) 
-        {
-            if (!slide) continue;
+    private onBulkSlideUsersAndItemsEvent(event: BulkSlideUsersItemsEvent): void
+    {
+        if (!(event instanceof BulkSlideUsersItemsEvent) || !event.connection || !this._roomCreator) return;
 
-            // Usar rollRoomObjectFloor para animar el movimiento
-            this._roomCreator.rollRoomObjectUser(
-                this._currentRoomId,
-                slide.roomIndex,
-                slide.fromX,
-                slide.fromY,
-                parseFloat(slide.fromZ),
-                slide.toX,
-                slide.toY,
-                parseFloat(slide.toZ),
-                slide.fromStatus,
-                slide.toStatus,
-                slide.fromRotation,
-                slide.toRotation
-            );
-            this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, slide.roomIndex, slide.toStatus);
+        const parser = event.getParser();
+        const itemSlides = parser.itemSlides;
+        const userSlides = parser.userSlides;
+
+        // Procesar items
+        if (itemSlides && itemSlides.length > 0) {
+            for (const slide of itemSlides) 
+            {
+                if (!slide) continue;
+
+                const from: IVector3D = new Vector3d(slide.fromX, slide.fromY, parseFloat(slide.fromZ));
+                const to: IVector3D = new Vector3d(slide.toX, slide.toY, parseFloat(slide.toZ));
+
+                // Usar rollRoomObjectFloor para animar el movimiento
+                this._roomCreator.rollRoomObjectFloor(
+                    this._currentRoomId,
+                    slide.virtualId,
+                    from,
+                    to
+                );
+
+                // Actualizar la rotación si cambió
+                if (slide.fromRotation !== slide.toRotation) {
+                    const direction: IVector3D = new Vector3d(slide.toRotation);
+                    this._roomCreator.updateRoomObjectFloor(this._currentRoomId, slide.virtualId, null, direction, null, null);
+                }
+            }
+        }
+
+        // Procesar users
+        if (userSlides && userSlides.length > 0) {
+            for (const slide of userSlides) 
+            {
+                if (!slide) continue;
+
+                const from: IVector3D = new Vector3d(slide.fromX, slide.fromY, parseFloat(slide.fromZ));
+                const to: IVector3D = new Vector3d(slide.toX, slide.toY, parseFloat(slide.toZ));
+
+                // Usar updateRoomObjectUserLocation para animar el movimiento del user sin cambiar rotación
+                this._roomCreator.updateRoomObjectUserLocation(
+                    this._currentRoomId,
+                    slide.roomIndex,
+                    from,
+                    to,
+                    true, // canStandUp
+                    0, // baseY
+                    null, // direction (no cambiar)
+                    NaN, // headDirection (no cambiar)
+                );
+            }
         }
     }
-    
 
     private onFurnitureWallAddEvent(event: FurnitureWallAddEvent): void
     {
@@ -815,17 +864,6 @@ export class RoomMessageHandler extends Disposable
         const alpha = Math.max(0, Math.min(255, parser.alpha));
 
         this._roomCreator.updateRoomObjectUserAction(this._currentRoomId, parser.unitId, RoomObjectVariable.FIGURE_FOCUS_ALPHA, alpha);
-    }
-
-    private onRoomSpotlightOverlayEvent(event: RoomSpotlightOverlayEvent): void
-    {
-        if (!(event instanceof RoomSpotlightOverlayEvent) || !event.connection || !this._roomCreator) return;
-
-        const parser = event.getParser();
-
-        if (!parser) return;
-
-        this._roomCreator.updateSpotlightOverlay(this._currentRoomId, parser.enabled, parser.radiusPercent, parser.featherPercent, parser.opacityPercent);
     }
 
     private onRoomUnitExpressionEvent(event: RoomUnitExpressionEvent): void
