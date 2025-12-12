@@ -14,3 +14,5 @@ export * from './RoomUnitStatusAction';
 export * from './RoomUnitStatusMessage';
 export * from './RoomUnitStatusParser';
 export * from './UserMessageData';
+export * from './RoomUnitStatusCustomParser';
+export * from './RoomUnitStatusCustomMessage';
