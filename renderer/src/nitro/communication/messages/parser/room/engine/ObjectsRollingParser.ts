@@ -41,15 +41,26 @@ export class ObjectsRollingParser implements IMessageParser {
         const unitId = wrapper.readInt();
         const height = parseFloat(wrapper.readString());
         const nextHeight = parseFloat(wrapper.readString());
-    
+
+        let posture: string = null;
+        let postureParam: string = null;
+
+        if (wrapper.bytesAvailable) {
+            posture = wrapper.readString();
+
+            if (wrapper.bytesAvailable) {
+                postureParam = wrapper.readString();
+            }
+        }
+
         switch (movementType) {
             case 0:
                 break;
             case 1:
-                this._unitRolling = new ObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), ObjectRolling.MOVE, this._animationTime);
+                this._unitRolling = new ObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), ObjectRolling.MOVE, this._animationTime, posture, postureParam);
                 break;
             case 2:
-                this._unitRolling = new ObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), ObjectRolling.SLIDE, this._animationTime);
+                this._unitRolling = new ObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), ObjectRolling.SLIDE, this._animationTime, posture, postureParam);
                 break;
         }
     

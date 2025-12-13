@@ -10,8 +10,10 @@ export class ObjectRolling
     private _targetLocation: IVector3D;
     private _movementType: string;
     private _animationTime: number;
+    private _posture: string | null;
+    private _postureParam: string | null;
 
-    constructor(id: number, location: IVector3D, targetLocation: IVector3D, movementType: string = null, animationTime: number = 500)
+    constructor(id: number, location: IVector3D, targetLocation: IVector3D, movementType: string = null, animationTime: number = 500, posture: string = null, postureParam: string = null)
     {
         this._id = id;
         this._location = location;
@@ -19,6 +21,8 @@ export class ObjectRolling
         this._targetLocation = targetLocation;
         this._movementType = movementType;
         this._animationTime = animationTime;
+        this._posture = posture;
+        this._postureParam = postureParam;
     }
 
     public get id(): number
@@ -44,5 +48,15 @@ export class ObjectRolling
     public get animationTime(): number
     {
         return this._animationTime;
+    }
+
+    public get posture(): string | null
+    {
+        return this._posture;
+    }
+
+    public get postureParam(): string | null
+    {
+        return this._postureParam;
     }
 }

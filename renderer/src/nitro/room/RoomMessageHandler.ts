@@ -426,8 +426,21 @@ export class RoomMessageHandler extends Disposable {
             this._roomCreator.updateRoomObjectUserLocation(
                 this._currentRoomId,
                 unitRollData.id,
-                unitRollData.location, // location (3er parámetro)
-                unitRollData.targetLocation, // targetLocation (4to)
+                // If the server provided a postureParam (height offset), add it to both from/to Z
+                ((): IVector3D => {
+                    const offset = parseFloat((unitRollData as any).postureParam || '0');
+                    if (!isNaN(offset) && offset !== 0) {
+                        return new Vector3d(unitRollData.location.x, unitRollData.location.y, unitRollData.location.z + offset);
+                    }
+                    return unitRollData.location;
+                })(), // location (3er parámetro)
+                ((): IVector3D => {
+                    const offset = parseFloat((unitRollData as any).postureParam || '0');
+                    if (!isNaN(offset) && offset !== 0) {
+                        return new Vector3d(unitRollData.targetLocation.x, unitRollData.targetLocation.y, unitRollData.targetLocation.z + offset);
+                    }
+                    return unitRollData.targetLocation;
+                })(), // targetLocation (4to)
                 false, // canStandUp (5to) - valor por defecto: false
                 0, // baseY (6to) - valor por defecto: 0
                 null, // direction (7mo) - valor por defecto: null
@@ -438,18 +451,37 @@ export class RoomMessageHandler extends Disposable {
             const object = this._roomCreator.getRoomObjectUser(this._currentRoomId, unitRollData.id);
 
             if (object && object.type !== RoomObjectUserType.MONSTER_PLANT) {
-                let posture = 'std';
+                // If the server provided a posture string during the slide, use it. Otherwise fallback to defaults.
+                const providedPosture = (unitRollData as any).posture;
+                const providedPostureParam = (unitRollData as any).postureParam || '';
 
-                switch (unitRollData.movementType) {
-                    case ObjectRolling.MOVE:
-                        posture = 'mv';
-                        break;
-                    case ObjectRolling.SLIDE:
-                        posture = 'std';
-                        break;
+                if (providedPosture && providedPosture.length) {
+                    this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, providedPosture, providedPostureParam);
+                    // Re-apply posture after animation ends to avoid intermediate updates clearing it
+                    const animationMs = unitRollData.animationTime || 0;
+                    try {
+                        setTimeout(() => {
+                            if (this._roomCreator) {
+                                this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, providedPosture, providedPostureParam);
+                            }
+                        }, Math.max(50, animationMs + 50));
+                    } catch (e) {
+                        // ignore scheduling errors
+                    }
+                } else {
+                    let posture = 'std';
+
+                    switch (unitRollData.movementType) {
+                        case ObjectRolling.MOVE:
+                            posture = 'mv';
+                            break;
+                        case ObjectRolling.SLIDE:
+                            posture = 'std';
+                            break;
+                    }
+
+                    this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, posture);
                 }
-
-                this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, posture);
             }
         }
     }
