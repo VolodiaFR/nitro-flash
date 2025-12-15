@@ -1,9 +1,9 @@
-import { IMessageDataWrapper, IMessageParser, ObjectRolling, Vector3d } from '../../../../../../api';
+import { BulkObjectRolling, IMessageDataWrapper, IMessageParser, Vector3d } from '../../../../../../api';
 
 export class BulkObjectsRollingParser implements IMessageParser {
     private _rollerId: number;
-    private _itemsRolling: ObjectRolling[];
-    private _unitRolling: ObjectRolling;
+    private _itemsRolling: BulkObjectRolling[];
+    private _unitRolling: BulkObjectRolling;
     private _unitAnimationTime: number;
     private _itemsAnimationTime: number;
 
@@ -31,7 +31,7 @@ export class BulkObjectsRollingParser implements IMessageParser {
             const id = wrapper.readInt();
             const height = parseFloat(wrapper.readString());
             const nextHeight = parseFloat(wrapper.readString());
-            this._itemsRolling.push(new ObjectRolling(id, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight)));
+            this._itemsRolling.push(new BulkObjectRolling(id, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight)));
         }
 
         // Read optional animationTime for items (server writes it after items count)
@@ -59,11 +59,11 @@ export class BulkObjectsRollingParser implements IMessageParser {
             case 0:
                 break;
             case 1:
-                this._unitRolling = new ObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), ObjectRolling.MOVE);
+                this._unitRolling = new BulkObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), BulkObjectRolling.MOVE);
                 this._unitAnimationTime = animationTime;
                 break;
             case 2:
-                this._unitRolling = new ObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), ObjectRolling.SLIDE);
+                this._unitRolling = new BulkObjectRolling(unitId, new Vector3d(x, y, height), new Vector3d(nextX, nextY, nextHeight), BulkObjectRolling.SLIDE);
                 this._unitAnimationTime = animationTime;
                 break;
         }
@@ -76,11 +76,11 @@ export class BulkObjectsRollingParser implements IMessageParser {
         return this._rollerId;
     }
 
-    public get itemsRolling(): ObjectRolling[] {
+    public get itemsRolling(): BulkObjectRolling[] {
         return this._itemsRolling;
     }
 
-    public get unitRolling(): ObjectRolling {
+    public get unitRolling(): BulkObjectRolling {
         return this._unitRolling;
     }
 
