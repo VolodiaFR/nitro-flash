@@ -492,7 +492,21 @@ export class RoomMessageHandler extends Disposable
                         break;
                 }
 
-                this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, posture);
+                // If server provided an explicit unit status (e.g. "sit 0.6"), prefer that
+                const providedStatus = parser.unitStatus;
+
+                if (providedStatus && providedStatus.length) {
+                    const idx = providedStatus.indexOf(' ');
+                    if (idx > 0) {
+                        const type = providedStatus.substring(0, idx);
+                        const param = providedStatus.substring(idx + 1);
+                        this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, type, param);
+                    } else {
+                        this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, providedStatus);
+                    }
+                } else {
+                    this._roomCreator.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, posture);
+                }
             }
         }
     }

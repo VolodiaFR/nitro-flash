@@ -6,6 +6,7 @@ export class ObjectsRollingParser implements IMessageParser {
     private _unitRolling: ObjectRolling;
     private _unitAnimationTime: number;
     private _itemsAnimationTime: number;
+    private _unitStatus: string;
 
     public flush(): boolean {
         this._rollerId = 0;
@@ -54,6 +55,17 @@ export class ObjectsRollingParser implements IMessageParser {
             // New optional int specifying animation duration (ms)
             animationTime = wrapper.readInt();
         }
+
+        // Optional avatar status string (like "sit 0.6" or "lay 0")
+        let unitStatus: string = null;
+        if (wrapper.bytesAvailable) {
+            try {
+                unitStatus = wrapper.readString();
+            } catch (e) {
+                unitStatus = null;
+            }
+        }
+        this._unitStatus = unitStatus;
     
         switch (movementType) {
             case 0:
@@ -90,5 +102,9 @@ export class ObjectsRollingParser implements IMessageParser {
 
     public get itemsAnimationTime(): number {
         return this._itemsAnimationTime;
+    }
+
+    public get unitStatus(): string {
+        return this._unitStatus;
     }
 }
