@@ -29,6 +29,7 @@ export class GetFurniFixToolFurniDataParser implements IMessageParser {
     private _amount: number;
     private _orderNum: number;
     private _flatId: number;
+    private _isWall: number;
 
 
     public flush(): boolean {
@@ -58,6 +59,7 @@ export class GetFurniFixToolFurniDataParser implements IMessageParser {
         this._amount = 0;
         this._orderNum = 0;
         this._flatId = 0;
+        this._isWall = 0;
         return true;
     }
 
@@ -95,7 +97,7 @@ export class GetFurniFixToolFurniDataParser implements IMessageParser {
             this._orderNum = parseInt(wrapper.readString());
             
             this._flatId = parseInt(wrapper.readString());
-            
+            this._isWall = parseInt(wrapper.readString());
 
             return true;
         } catch (error) {
@@ -131,4 +133,5 @@ export class GetFurniFixToolFurniDataParser implements IMessageParser {
     public get amount(): number { return this._amount; }
     public get orderNum(): number { return this._orderNum; }
     public get flatId(): number { return this._flatId; }
+    public get isWall(): number { return this._isWall; }
 }

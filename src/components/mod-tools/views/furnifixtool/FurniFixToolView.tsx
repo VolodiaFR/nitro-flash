@@ -16,7 +16,7 @@ interface FurniFixToolViewProps
 const numericFields = new Set([
     'id', 'spriteId', 'width', 'length', 'stackHeight',
     'interactionModesCount', 'pageId', 'costCredits', 'costPixels',
-    'costDiamonds', 'amount', 'orderNum', 'flatId'
+    'costDiamonds', 'amount', 'orderNum', 'flatId', 'isWall'
 ]);
 
 const stringFields = new Set([
@@ -111,6 +111,7 @@ export const FurniFixToolView: FC<FurniFixToolViewProps> = ({ onCloseClick }) =>
             amount: parser.amount,
             orderNum: parser.orderNum,
             flatId: parser.flatId,
+            isWall: parser.isWall,
             shouldUpdateCatalog: 0
         };
         setFurniData(newData);
@@ -403,6 +404,7 @@ export const FurniFixToolView: FC<FurniFixToolViewProps> = ({ onCloseClick }) =>
                         <div className="block">
                             <img src={String(GetConfiguration("furni.asset.icon.url")).replace("%libname%%param%", furniData.itemName)} alt="Icono" />
                             <h3>Información Básica</h3>
+                            {furniData.isWall === 1 && (<div style={{ marginBottom: '8px', color: '#856404', backgroundColor: '#fff3cd', padding: '6px 8px', borderRadius: '4px', border: '1px solid #ffeeba' }}>Item de pared seleccionado</div>)}
                             <div className="input-group">
                                 <label>Public Name</label>
                                 <input type="text" name="publicName" value={furniData.publicName || ''} onChange={handleInputChange} />

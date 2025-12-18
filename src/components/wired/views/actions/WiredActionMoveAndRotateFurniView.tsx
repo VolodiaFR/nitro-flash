@@ -6,20 +6,48 @@ import { WiredActionBaseView } from './WiredActionBaseView';
 
 const directionOptions: { value: number, icon: string }[] = [
     {
-        value: 0,
+        value: 4,
         icon: 'ne'
     },
     {
-        value: 2,
+        value: 5,
         icon: 'se'
     },
     {
-        value: 4,
+        value: 6,
         icon: 'sw'
     },
     {
-        value: 6,
+        value: 7,
         icon: 'nw'
+    },
+    {
+        value: 8,
+        icon: 'e'
+    },
+    {
+        value: 9,
+        icon: 's'
+    },
+    {
+        value: 10,
+        icon: 'w'
+    },
+    {
+        value: 11,
+        icon: 'n'
+    },
+    {
+        value: 2,
+        icon: 'mv-2'
+    },
+    {
+        value: 3,
+        icon: 'mv-3'
+    },
+    {
+        value: 1,
+        icon: 'mv-1'
     }
 ];
 

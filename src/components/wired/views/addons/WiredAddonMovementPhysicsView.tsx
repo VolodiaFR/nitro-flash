@@ -4,8 +4,7 @@ import { Column, Flex, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredAddonBaseView } from './WiredAddonBaseView';
 
-export const WiredAddonMovementPhysicsView: FC = () =>
-{
+export const WiredAddonMovementPhysicsView: FC = () => {
     const [height, setHeight] = useState(false);
     const [throughFurni, setThroughFurni] = useState(false);
     const [throughUser, setThroughUser] = useState(false);
@@ -17,8 +16,7 @@ export const WiredAddonMovementPhysicsView: FC = () =>
 
     const { trigger = null, setIntParams = null } = useWired();
 
-    const save = () =>
-    {
+    const save = () => {
         // empaquetar flags como bitmask en un solo entero
         let flags = 0;
         if (height) flags |= 1;          // bit 0
@@ -29,8 +27,7 @@ export const WiredAddonMovementPhysicsView: FC = () =>
         setIntParams([flags, typeOfAdvancedOptionOne, typeOfAdvancedOptionTwo, typeOfAdvancedOptionThree]);
     };
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         const intData = trigger?.intData || [];
         const flags = intData[0] ?? 0;
 
@@ -48,39 +45,101 @@ export const WiredAddonMovementPhysicsView: FC = () =>
         <WiredAddonBaseView hasSpecialInput={true} save={save} requiresFurni={WiredFurniType.STUFF_SELECTION_OPTION_BY_ID}>
             <Column gap={1}>
                 <Text bold>{LocalizeText('wiredfurni.params.conditions')}</Text>
-                <Flex alignItems="center" gap={1}>
-                    <input className="form-check-input" type="checkbox" id="height" checked={height} onChange={e => setHeight(e.target.checked)} />
-                    <Text>{LocalizeText('wiredfurni.params.mov.physic.height')}</Text>
+                <Flex alignItems="center" justifyContent='center' gap={1} style={{ marginTop: "5px", marginBottom: "5px" }}>
+                    <input className="check-menu-wired" type="checkbox" id="height" checked={height} onChange={e => setHeight(e.target.checked)} />
+                    <Text style={{ textIndent: "10px" }}>{LocalizeText('wiredfurni.params.mov.physic.height')}</Text>
                 </Flex>
-                <Flex alignItems="center" gap={1}>
-                    <input className="form-check-input" type="checkbox" id="throughFurni" checked={throughFurni} onChange={e => setThroughFurni(e.target.checked)} />
-                    <Text>{LocalizeText('wiredfurni.params.mov.physic.throughFurni')}</Text>
+                <hr className="m-0 bg-dark" />
+
+                <Flex alignItems="center" justifyContent='center' gap={1} style={{ marginTop: "5px", marginBottom: "5px" }}>
+                    <input className="check-menu-wired" type="checkbox" id="throughFurni" checked={throughFurni} onChange={e => setThroughFurni(e.target.checked)} />
+                    <Text style={{ textIndent: "10px" }}>{LocalizeText('wiredfurni.params.mov.physic.throughFurni')}</Text>
                 </Flex>
-                <Flex alignItems="center" gap={1}>
-                    <input className="form-check-input" type="checkbox" id="throughUser" checked={throughUser} onChange={e => setThroughUser(e.target.checked)} />
-                    <Text>{LocalizeText('wiredfurni.params.mov.physic.throughUser')}</Text>
+                <Text center>Fuente de furnis/items</Text>
+                {/* Advanced Option One */}
+                <div className='align-advancedoptionsone'>
+                    <div className="button-group">
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionOne === 0 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionOne(0)}
+                                className={` icon-neighbor-0 button-icons-selector-general`} />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionOne === 1 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionOne(1)}
+                                className={` icon-neighbor-1 button-icons-selector-general`}
+                            />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionOne === 2 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionOne(2)}
+                                className={` icon-neighbor-5 button-icons-selector-general`}
+                            />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionOne === 3 ? 'placeholder-adv-options-selected' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionOne(3)}
+                                className={` icon-neighbor-4 button-icons-selector-general`} />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionOne === 4 ? 'placeholder-adv-options-selected' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionOne(4)}
+                                className={` icon-neighbor-7 button-icons-selector-general`} />
+                        </Flex>
+                    </div>
+                </div>
+
+                {typeOfAdvancedOptionOne !== undefined && (
+                    <Text style={{ textAlign: "center", marginBottom:"5px" }}>{['Accionador', 'Seleccionados', 'Selector', 'Señal', 'Todos en la sala'][typeOfAdvancedOptionOne]}</Text>
+                )}
+
+                <hr className="m-0 bg-dark"/>
+
+                <Flex alignItems="center" justifyContent='center' gap={1} style={{ marginTop: "5px", marginBottom: "5px" }}>
+                    <input className="check-menu-wired" type="checkbox" id="throughUser" checked={throughUser} onChange={e => setThroughUser(e.target.checked)} />
+                    <Text style={{ textIndent: "10px" }}>{LocalizeText('wiredfurni.params.mov.physic.throughUser')}</Text>
                 </Flex>
+                <Text center>Fuente de usuarios</Text>
+                {/* Advanced Option Three */}
+                <div className='align-advancedoptionsone'>
+                    <div className="button-group">
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionThree === 0 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionThree(0)}
+                                className={` icon-neighbor-0 button-icons-selector-general`} />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionThree === 1 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionThree(1)}
+                                className={` icon-neighbor-5 button-icons-selector-general`}
+                            />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionThree === 2 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionThree(2)}
+                                className={` icon-neighbor-2 button-icons-selector-general`}
+                            />
+                        </Flex>
+                        <Flex center className={` placeholder-adv-options ${typeOfAdvancedOptionThree === 3 ? 'placeholder-adv-options-selected' : 'placeholder-adv-options'}`}>
+                            <div
+                                onClick={() => setTypeOfAdvancedOptionThree(3)}
+                                className={` icon-neighbor-7 button-icons-selector-general`} />
+                        </Flex>
+                    </div>
+                </div>
+                {typeOfAdvancedOptionThree !== undefined && (
+                    <Text style={{ textAlign: "center", marginBottom:"5px" }}>{['Accionador', 'Selector', 'Señal', 'Todos en la sala'][typeOfAdvancedOptionThree]}</Text>
+                )}
+
+                <hr className="m-0 bg-dark" />
+
+
                 <Flex alignItems="center" gap={1}>
                     <input className="form-check-input" type="checkbox" id="blockedByFurni" checked={blockedByFurni} onChange={e => setBlockedByFurni(e.target.checked)} />
                     <Text>{LocalizeText('wiredfurni.params.mov.physic.blockedByFurni')}</Text>
                 </Flex>
             </Column>
-            <hr className="m-0 bg-dark" />
-            <Text>Mover a través de furnis</Text>
-            {/* Advanced Option One */}
-            <div className='align-advancedoptionsone'>
-                <div className="button-group">
-                    <button onClick={() => setTypeOfAdvancedOptionOne(0)} className={` icon-neighbor-3 ${typeOfAdvancedOptionOne === 0 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionOne(1)} className={` icon-neighbor-1 ${typeOfAdvancedOptionOne === 1 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionOne(2)} className={` icon-neighbor-5 ${typeOfAdvancedOptionOne === 2 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionOne(3)} className={` icon-neighbor-2 ${typeOfAdvancedOptionOne === 3 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionOne(4)} className={` icon-neighbor-7 ${typeOfAdvancedOptionOne === 4 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                </div>
-            </div>
 
-            {typeOfAdvancedOptionOne !== undefined && (
-                <Text style={{ textAlign: "center" }}>{['Accionador', 'Seleccionados', 'Selector', 'Señal', 'Todos en la sala'][typeOfAdvancedOptionOne]}</Text>
-            )}
             <Text>Bloqueado por furnis</Text>
             {/* Advanced Option Two */}
             <div className='align-advancedoptionsone'>
@@ -95,19 +154,7 @@ export const WiredAddonMovementPhysicsView: FC = () =>
             {typeOfAdvancedOptionTwo !== undefined && (
                 <Text style={{ textAlign: "center" }}>{['Accionador', 'Seleccionados', 'Selector', 'Señal', 'Todos en la sala'][typeOfAdvancedOptionTwo]}</Text>
             )}
-            <Text>Mover a través de usuarios</Text>
-            {/* Advanced Option Three */}
-            <div className='align-advancedoptionsone'>
-                <div className="button-group">
-                    <button onClick={() => setTypeOfAdvancedOptionThree(0)} className={` icon-neighbor-3 ${typeOfAdvancedOptionThree === 0 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionThree(1)} className={` icon-neighbor-5 ${typeOfAdvancedOptionThree === 1 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionThree(2)} className={` icon-neighbor-2 ${typeOfAdvancedOptionThree === 2 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                    <button onClick={() => setTypeOfAdvancedOptionThree(3)} className={` icon-neighbor-6 ${typeOfAdvancedOptionThree === 3 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`} />
-                </div>
-            </div>
-            {typeOfAdvancedOptionThree !== undefined && (
-                <Text style={{ textAlign: "center" }}>{['Accionador', 'Selector', 'Señal', 'Todos en la sala'][typeOfAdvancedOptionThree]}</Text>
-            )}
+
         </WiredAddonBaseView>
     );
 };
