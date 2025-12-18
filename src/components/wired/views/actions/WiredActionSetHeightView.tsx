@@ -5,42 +5,34 @@ import { Button, Column, Flex, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
-export const WiredActionSetHeightView: FC<{}> = props =>
-{
+export const WiredActionSetHeightView: FC<{}> = props => {
     const [mode, setMode] = useState(0);
     const [height, setHeight] = useState(0);
     const [inputValue, setInputValue] = useState('0.00');
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         setInputValue(height.toFixed(2));
     }, [height]);
 
-    const handleInputBlur = () =>
-    {
+    const handleInputBlur = () => {
         const value = parseFloat(inputValue);
-        if (!isNaN(value))
-        {
+        if (!isNaN(value)) {
             const clampedValue = Math.max(0, Math.min(40, value));
             setHeight(clampedValue);
         }
     };
-    const save = () =>
-    {
+    const save = () => {
         setIntParams([mode]);
         setStringParam(height.toString())
     }
 
-    useEffect(() =>
-    {
-        if (trigger?.intData?.length >= 1)
-        {
+    useEffect(() => {
+        if (trigger?.intData?.length >= 1) {
             setMode(trigger.intData[0]);
             setHeight(parseFloat(trigger.stringData || '0'));
         }
-        else
-        {
+        else {
             setMode(0);
         }
     }, [trigger]);
@@ -53,47 +45,47 @@ export const WiredActionSetHeightView: FC<{}> = props =>
         >
             <Text>{'Selecciona el modo de altura:'}</Text>
             <Column gap={1}>
-                <label>
-                    <input
+                <Flex alignItems="center" gap={1}>
+                    <input className="form-check-input"
                         type="radio"
                         name="timerMode"
                         value={0}
                         checked={mode === 0}
-                        onChange={() => setMode(0)}
-                    />
+                        onChange={() => setMode(0)} />
                     Aumentar
-                </label>
-                <label>
-                    <input
+                </Flex>
+                <Flex alignItems="center" gap={1}>
+                    <input className="form-check-input"
                         type="radio"
                         name="timerMode"
                         value={1}
                         checked={mode === 1}
                         onChange={() => setMode(1)}
-                    />
+                        />
                     Disminuir
-                </label>
-                <label>
-                    <input
+                </Flex>
+                <Flex alignItems="center" gap={1}>
+                    <input className="form-check-input"
                         type="radio"
                         name="timerMode"
                         value={3}
                         checked={mode === 3}
                         onChange={() => setMode(3)}
-                    />
+                        />
                     Establecer
-                </label>
+                </Flex>
 
                 <Flex alignItems="center" justifyContent="between">
                     <Text bold>{LocalizeText('Altura:')}</Text>
                     <Flex gap={1}>
                         <input
+                        className="form-control form-control-sm"
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onBlur={handleInputBlur}
                             onKeyPress={(e) => e.key === 'Enter' && handleInputBlur()}
-                            style={{ width: '80px', textAlign: 'center' }}
+                            style={{ width: '50px', textAlign: 'center' }}
                         />
                         <Text>m</Text>
                     </Flex>

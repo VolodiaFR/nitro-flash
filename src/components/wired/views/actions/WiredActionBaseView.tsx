@@ -58,7 +58,7 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
 
             {furniOptions === 1 && (
                 <Column>
-                    <Text center bold>{LocalizeText('select.furni.source.actions', ['seconds'], [GetWiredTimeLocale(actionDelay)])}</Text>
+                    <Text center bold>{LocalizeText('select.furni.source.actions')}</Text>
                     <div className='align-advancedoptionsone'>
                         <div className="button-group">
                             <Flex center className={` placeholder-adv-options ${furniType === 0 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
@@ -97,23 +97,30 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
 
             {userOptions === 1 && (
                 <Column>
-                    <Text bold>Users</Text>
+                    <Text center bold>{LocalizeText('select.user.source.actions')}</Text>
                     <div className='align-advancedoptionsone'>
                         <div className="button-group">
-                            <button
-                                onClick={() => setUserType(0)}
-                                className={` icon-neighbor-0 ${userType === 0 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`}
-                            /><button
-                                onClick={() => setUserType(1)}
-                                className={` icon-neighbor-5 ${userType === 1 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`}
-                            /><button
-                                onClick={() => setUserType(2)}
-                                className={` icon-neighbor-2 ${userType === 2 ? 'button-icons-selector-general-selected' : 'button-icons-selector-general'}`}
-                            />
+                            <Flex center className={` placeholder-adv-options ${userType === 0 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                                <div
+                                    onClick={() => setUserType(0)}
+                                    className={` icon-neighbor-0 button-icons-selector-general`} />
+                            </Flex>
+                            <Flex center className={` placeholder-adv-options ${userType === 1 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                                <div
+                                    onClick={() => setUserType(1)}
+                                    className={` icon-neighbor-5 button-icons-selector-general`}
+                                />
+                            </Flex>
+                            <Flex center className={` placeholder-adv-options ${userType === 2 ? 'placeholder-adv-options-selected ' : 'placeholder-adv-options'}`}>
+                                <div
+                                    onClick={() => setUserType(2)}
+                                    className={` icon-neighbor-2 button-icons-selector-general`}
+                                />
+                            </Flex>
                         </div>
                     </div>
                     {userType !== undefined && (
-                        <Text style={{ textAlign: "center" }}>{['Usuario Accionador', 'Usuario de Selector', 'Usuario de Señal', 'Usar Items de Señal'][userType]}</Text>
+                        <Text style={{ textAlign: "center" }}>{['Usuario Accionador', 'Usuario de Selector', 'Usuario de Señal'][userType]}</Text>
                     )}
                 </Column>
 
