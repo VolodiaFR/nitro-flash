@@ -80,6 +80,7 @@ export const WiredActionMoveFurniView: FC<{}> = props =>
                     <div className="col" />
                 </Flex>
             </Column>
+            <hr className="m-0 bg-dark" />
             <Column gap={ 1 }>
                 <Text gfbold>{ LocalizeText('wiredfurni.params.rotatefurni') }</Text>
                 { rotationOptions.map(option =>

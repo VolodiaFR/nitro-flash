@@ -4,6 +4,7 @@ import { LocalizeText } from '../../../../api';
 import { Button, Column, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredAddonBaseView } from './WiredAddonBaseView';
+import { WiredSliderArrows } from '../WiredSliderArrows';
 
 export const WiredAddonAnimationTimeView: FC = () => {
     const [max, setMax] = useState(1);
@@ -28,24 +29,14 @@ export const WiredAddonAnimationTimeView: FC = () => {
                 </Text>
 
             </Column>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '10px 0' }}>
-                <Button onClick={() => setMax(prev => Math.max(50, prev - 50))}>
-    -
-</Button>
-
-<ReactSlider
-    className={'nitro-slider'}
-    min={50}
-    max={2000}
-    step={50}
-    value={max}
-    onChange={value => setMax(value)} />
-
-<Button onClick={() => setMax(prev => Math.min(2000, prev + 50))}>
-    +
-</Button>
-
-            </div>
+            
+                <WiredSliderArrows
+                    min={50}
+                    max={2000}
+                    step={50}
+                    value={max}
+                    onChange={value => setMax(value)} />
+        
         </WiredAddonBaseView>
     );
 };

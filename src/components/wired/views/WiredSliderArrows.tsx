@@ -8,10 +8,11 @@ export interface WiredSliderArrowsProps
 	value: number;
 	min?: number;
 	max?: number;
+	step?: number;
 	onChange: (value: number) => void;
 }
 
-export const WiredSliderArrows: FC<WiredSliderArrowsProps> = ({ value, min = 0, max = 20, onChange }) =>
+export const WiredSliderArrows: FC<WiredSliderArrowsProps> = ({ value, min = 0, max = 20, step = 1, onChange }) =>
 {
 	const clamp = useCallback((nextValue: number) =>
 	{
@@ -21,14 +22,14 @@ export const WiredSliderArrows: FC<WiredSliderArrowsProps> = ({ value, min = 0, 
 		return nextValue;
 	}, [ min, max ]);
 
-	const step = useCallback((delta: number) =>
+	const stepFn = useCallback((delta: number) =>
 	{
-		onChange(clamp(value + delta));
-	}, [ clamp, onChange, value ]);
+		onChange(clamp(value + (delta * step)));
+	}, [ clamp, onChange, value, step ]);
 
 	return (
 		<Flex center gap={ 2 }>
-			<div  className="wired-slider-arrow" onClick={ () => step(-1) } aria-label="Decrease value">
+			<div  className="wired-slider-arrow" onClick={ () => stepFn(-1) } aria-label="Decrease value">
 			</div>
 			<ReactSlider
 				className={ 'wired-slider' }
@@ -36,7 +37,7 @@ export const WiredSliderArrows: FC<WiredSliderArrowsProps> = ({ value, min = 0, 
 				max={ max }
 				value={ value }
 				onChange={ event => onChange(event) } />
-			<div  className="wired-slider-arrow-left" onClick={ () => step(1) } aria-label="Increase value">
+			<div  className="wired-slider-arrow-left" onClick={ () => stepFn(1) } aria-label="Increase value">
 
 			</div>
 		</Flex>

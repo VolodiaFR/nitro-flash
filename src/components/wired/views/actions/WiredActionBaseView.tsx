@@ -55,7 +55,7 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
                     value={ actionDelay }
                     onChange={ value => setActionDelay(value) } />
             </Column>
-
+            <hr className="m-0 bg-dark" />
             {furniOptions === 1 && (
                 <Column>
                     <Text center bold>{LocalizeText('select.furni.source.actions')}</Text>
