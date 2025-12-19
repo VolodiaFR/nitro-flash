@@ -79,19 +79,49 @@ export const WiredActionMoveAndRotateFurniView: FC<{}> = props =>
         <WiredActionBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT } hasSpecialInput={ true } save={ save }>
             <Column gap={ 1 }>
                 <Text>{ LocalizeText('wiredfurni.params.startdir') }</Text>
-                <Flex gap={ 1 }>
-                    { directionOptions.map(option =>
-                    {
-                        return (
-                            <Flex key={ option.value } alignItems="center" gap={ 1 }>
-                                <input className="form-check-input" type="radio" name="movement" id={ `movement${ option.value }` } checked={ (movement === option.value) } onChange={ event => setMovement(option.value) } />
-                                <Text>
-                                    <i className={ `icon icon-${ option.icon }` } />
-                                </Text>
-                            </Flex>
-                        )
-                    }) }
-                </Flex>
+                <Column gap={ 1 }>
+                    <Flex gap={ 1 }>
+                        { directionOptions.slice(0, 4).map(option =>
+                        {
+                            return (
+                                <Flex key={ option.value } alignItems="center" gap={ 1 }>
+                                    <input className="form-check-input" type="radio" name="movement" id={ `movement${ option.value }` } checked={ (movement === option.value) } onChange={ event => setMovement(option.value) } />
+                                    <Text>
+                                        <i className={ `icon icon-${ option.icon }` } />
+                                    </Text>
+                                </Flex>
+                            )
+                        }) }
+                    </Flex>
+                    <Flex gap={ 1 }>
+                        { directionOptions.slice(4, 8).map(option =>
+                        {
+                            return (
+                                <Flex key={ option.value } alignItems="center" gap={ 1 }>
+                                    <input className="form-check-input" type="radio" name="movement" id={ `movement${ option.value }` } checked={ (movement === option.value) } onChange={ event => setMovement(option.value) } />
+                                    <Text>
+                                        <i className={ `icon icon-${ option.icon }` } />
+                                    </Text>
+                                </Flex>
+                            )
+                        }) }
+                    </Flex>
+                    { directionOptions.slice(8).length > 0 && (
+                        <Flex gap={ 1 }>
+                            { directionOptions.slice(8).map(option =>
+                            {
+                                return (
+                                    <Flex key={ option.value } alignItems="center" gap={ 1 }>
+                                        <input className="form-check-input" type="radio" name="movement" id={ `movement${ option.value }` } checked={ (movement === option.value) } onChange={ event => setMovement(option.value) } />
+                                        <Text>
+                                            <i className={ `icon icon-${ option.icon }` } />
+                                        </Text>
+                                    </Flex>
+                                )
+                            }) }
+                        </Flex>
+                    ) }
+                </Column>
             </Column>
             <Column gap={ 1 }>
                 <Text >{ LocalizeText('wiredfurni.params.turn') }</Text>

@@ -141,7 +141,7 @@ export const WiredAddonMovementPhysicsView: FC = () => {
 
                 <Flex alignItems="center" justifyContent='center' gap={1} style={{ marginTop: "5px", marginBottom: "5px" }}>
                     <input className="check-menu-wired" type="checkbox" id="blockedByFurni" checked={blockedByFurni} onChange={e => { const checked = e.target.checked; setBlockedByFurni(checked); if (!checked) setTypeOfAdvancedOptionTwo(0); }} />
-                    <Text style={{ textIndent: "10px" }}>{LocalizeText('wiredfurni.params.mov.physic.throughUser')}</Text>
+                    <Text style={{ textIndent: "10px" }}>{LocalizeText('wiredfurni.params.mov.physic.throughFurni')}</Text>
                 </Flex>
                 {blockedByFurni && <>
                 <Text center>Fuente de furnis/items</Text>
