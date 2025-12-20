@@ -113,7 +113,7 @@ export const ContextMenuView: FC<ContextMenuViewProps> = props =>
         let newStyle: CSSProperties = {};
 
         newStyle.left = (pos.x || 0);
-        newStyle.top = (pos.y || 0);
+        newStyle.top = (pos.y + 30 || 0) ;
         newStyle.opacity = opacity;
 
         if(Object.keys(style).length) newStyle = { ...newStyle, ...style };

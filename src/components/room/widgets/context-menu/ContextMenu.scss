@@ -9,30 +9,31 @@
         width: 250px;
         background: #2d2a26;
         border-top: 1px solid #000;
-
     }
 
-    &.name-only {
-        border-image-source: url(@/assets/flash/room/name_bg.png);
-        border-image-slice: 6 6 6 6 fill;
-        border-image-width: 6px 6px 6px 6px;
+    .avatar-info-name {
+        min-width: 100%;
         padding: 6px 18px;
-        width: unset;
-        text-align: center;
+        background-repeat: no-repeat;
+        height: 80px;
+        background-position: center;
+    }
+    .name-align{
+        position: relative;
+        top: -2px;
+    }
+    &.name-only {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        border-image-slice: 39 47 40 49 fill;
+        border-image-width: 39px 47px 40px 49px;
+        min-width: 97px;
+        height: 80px;
         font-size: 12px;
+        text-align: center;
 
-        &:after {
-            content: "";
-            background-image: url(@/assets/flash/room/pointer_after.png);
-            background-repeat: no-repeat;
-            width: 11px;
-            height: 9px;
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            right: 0;
-            margin: auto;
-        }
     }
 
     &.variable-only {

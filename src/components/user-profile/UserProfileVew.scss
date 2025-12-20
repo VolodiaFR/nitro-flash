@@ -1,7 +1,18 @@
+.background-profile-custom {
+    position: absolute;
+    width: 667px;
+    height: 605px;
+    top: -27px;
+    left: -25px;
+    background-size: cover;
+    background-position: center;
+    z-index: 10;
+}
+
 .user-profile {
-    width: $user-profile-width;
-    min-height: $user-profile-height;
-    max-height: 515px;
+    z-index: 1;
+    width: 617px;
+    height: 555px;
     color: $black;
     resize: none;
 
