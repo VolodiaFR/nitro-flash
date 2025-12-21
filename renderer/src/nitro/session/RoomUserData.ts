@@ -8,6 +8,7 @@ export class RoomUserData implements IRoomUserData
     private _sex: string = '';
     private _figure: string = '';
     private _custom: string = '';
+    private _avatarFrame: string = '';
     private _activityPoints: number;
     private _webID: number = 0;
     private _groupID: number = 0;
@@ -94,6 +95,16 @@ export class RoomUserData implements IRoomUserData
     public set custom(k: string)
     {
         this._custom = k;
+    }
+
+    public get avatarFrame(): string
+    {
+        return this._avatarFrame;
+    }
+
+    public set avatarFrame(k: string)
+    {
+        this._avatarFrame = k;
     }
 
     public get webID(): number

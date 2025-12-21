@@ -13,6 +13,7 @@ export class UserMessageData
     private _sex: string = '';
     private _figure: string = '';
     private _custom: string = '';
+    private _avatarFrame: string = '';
     private _activityPoints: number = 0;
     private _webID: number = 0;
     private _groupID: number = 0;
@@ -163,6 +164,19 @@ export class UserMessageData
         if(!this._isReadOnly)
         {
             this._custom = k;
+        }
+    }
+
+    public get avatarFrame(): string
+    {
+        return this._avatarFrame;
+    }
+
+    public set avatarFrame(k: string)
+    {
+        if(!this._isReadOnly)
+        {
+            this._avatarFrame = k;
         }
     }
 

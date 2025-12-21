@@ -181,6 +181,15 @@ export class UserDataManager extends Disposable
         userData.activityPoints = score;
     }
 
+    public updateAvatarFrame(roomIndex: number, frame: string): void
+    {
+        const userData = this.getUserDataByIndex(roomIndex);
+
+        if(!userData) return;
+
+        userData.avatarFrame = frame || '';
+    }
+
     public updatePetLevel(roomIndex: number, level: number): void
     {
         const userData = this.getUserDataByIndex(roomIndex);

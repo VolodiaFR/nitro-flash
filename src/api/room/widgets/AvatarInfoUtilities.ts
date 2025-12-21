@@ -16,6 +16,7 @@ export class AvatarInfoUtilities
         let id = -1;
         let name: string = null;
         let userType = 0;
+        let avatarFrame: string = '';
 
         switch(category)
         {
@@ -60,13 +61,14 @@ export class AvatarInfoUtilities
                 id = userData.webID;
                 name = userData.name;
                 userType = userData.type;
+                avatarFrame = userData.avatarFrame || '';
                 break;
             }
         }
 
         if(!name || !name.length) return null;
 
-        return new AvatarInfoName(objectId, category, id, name, userType);
+        return new AvatarInfoName(objectId, category, id, name, userType, false, avatarFrame);
     }
 
     public static getFurniInfo(objectId: number, category: number): AvatarInfoFurni
@@ -259,6 +261,7 @@ export class AvatarInfoUtilities
         userInfo.groupName = userData.groupName;
         userInfo.badges = roomSession.userDataManager.getUserBadges(userData.webID);
         userInfo.figure = userData.figure;
+        userInfo.avatarFrame = userData.avatarFrame || '';
         //var _local_8:Array = GetSessionDataManager().getUserTags(userData.webID);
         //this._Str_16287(userData.webId, _local_8);
         //this._container.habboGroupsManager.updateVisibleExtendedProfile(userData.webID);
@@ -289,6 +292,7 @@ export class AvatarInfoUtilities
         userInfo.isAmbassador = GetSessionDataManager().isAmbassador;
         userInfo.badges = [ AvatarInfoUser.DEFAULT_BOT_BADGE_ID ];
         userInfo.figure = userData.figure;
+        userInfo.avatarFrame = '';
 
         return userInfo;
     }

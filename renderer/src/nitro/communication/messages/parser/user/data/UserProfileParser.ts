@@ -18,6 +18,7 @@ export class UserProfileParser implements IMessageParser
     private _timePlayedSeconds: number;
     private _openProfileWindow: boolean;
     private _isVip: boolean;
+    private _avatarFrame: string;
 
     public flush(): boolean
     {
@@ -36,6 +37,7 @@ export class UserProfileParser implements IMessageParser
     this._timePlayedSeconds = 0;
         this._openProfileWindow = false;
     this._isVip = false;
+        this._avatarFrame = '';
 
         return true;
     }
@@ -70,6 +72,11 @@ export class UserProfileParser implements IMessageParser
             this._isVip = wrapper.readBoolean();
         } catch (e) {
             this._isVip = false;
+        }
+        try {
+            this._avatarFrame = wrapper.readString();
+        } catch (e) {
+            this._avatarFrame = '';
         }
 
         return true;
@@ -148,5 +155,10 @@ export class UserProfileParser implements IMessageParser
     public get isVip(): boolean
     {
         return this._isVip;
+    }
+
+    public get avatarFrame(): string
+    {
+        return this._avatarFrame;
     }
 }

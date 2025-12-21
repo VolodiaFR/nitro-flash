@@ -2,7 +2,7 @@ import { FC, useMemo } from 'react';
 import { AvatarInfoName, GetSessionDataManager } from '../../../../../api';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
 import { Flex } from '../../../../../common';
-import { NitroConfiguration } from '@nitrots/nitro-renderer';
+import { useFrameAsset } from '../../../../../hooks';
 
 interface AvatarInfoWidgetNameViewProps {
     nameInfo: AvatarInfoName;
@@ -27,12 +27,14 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
         return newClassNames;
     }, [nameInfo]);
 
-    const frameName = "airplane";
-    const personalizationUrl = NitroConfiguration.getValue<string>('personalization.url');
+    const borderUrl = useFrameAsset(nameInfo?.avatarFrame, 'border');
+    const nameUrl = useFrameAsset(nameInfo?.avatarFrame, 'username');
+    const borderStyle = borderUrl ? { borderImageSource: `url("${borderUrl}")` } : undefined;
+    const nameStyle = nameUrl ? { backgroundImage: `url("${nameUrl}")` } : undefined;
 
     return (
-        <ContextMenuView objectId={nameInfo.roomIndex} category={nameInfo.category} userType={nameInfo.userType} fades={shouldFade} classNames={getClassNames} onClose={onClose} isVariable={isVariable} style={{ borderImageSource: `url("${personalizationUrl}/${frameName}/border.png")` }}>
-            <Flex center justifyContent='center' alignItems='center' className="avatar-info-name" style={{ backgroundImage: `url("${personalizationUrl}/${frameName}/username.png")` }}>
+        <ContextMenuView objectId={nameInfo.roomIndex} category={nameInfo.category} userType={nameInfo.userType} fades={shouldFade} classNames={getClassNames} onClose={onClose} isVariable={isVariable} style={borderStyle}>
+            <Flex center justifyContent='center' alignItems='center' className="avatar-info-name" style={nameStyle}>
                 <Flex className='name-align' >
                     {nameInfo.name}
                 </Flex>

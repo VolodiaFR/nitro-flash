@@ -1,9 +1,9 @@
-import { NitroConfiguration, RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomSessionFavoriteGroupUpdateEvent, RoomSessionUserBadgesEvent, RoomSessionUserFigureUpdateEvent, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
+import { RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomSessionFavoriteGroupUpdateEvent, RoomSessionUserBadgesEvent, RoomSessionUserFigureUpdateEvent, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
 import { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useEffect, useState } from 'react';
 import { FaPencilAlt, FaTimes } from 'react-icons/fa';
 import { AvatarInfoUser, CloneObject, GetConfiguration, GetGroupInformation, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { Base, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text } from '../../../../../common';
-import { useMessageEvent, useRoom, useRoomSessionManagerEvent } from '../../../../../hooks';
+import { useFrameAsset, useMessageEvent, useRoom, useRoomSessionManagerEvent } from '../../../../../hooks';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
 import { InfoStandWidgetUserTagsView } from './InfoStandWidgetUserTagsView';
 
@@ -65,6 +65,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
             newValue.figure = event.figure;
             newValue.motto = event.customInfo;
             newValue.achievementScore = event.activityPoints;
+            newValue.avatarFrame = event.avatarFrame;
 
             return newValue;
         });
@@ -106,17 +107,17 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
         }
     }, [avatarInfo]);
 
-    if (!avatarInfo) return null;
+    const frameAssetUrl = useFrameAsset(avatarInfo?.avatarFrame, 'infowidget');
 
-    const frameName = "airplane";
-    const personalizationUrl = NitroConfiguration.getValue<string>('personalization.url');
+    if (!avatarInfo) return null;
 
     return (
 
         <Column className="nitro-infostand rounded">
             <Column overflow="visible" className="container-fluid content-area" gap={1}>
                 <Column gap={1}>
-                    <div className='frame-infowidget-custom' style={{ borderImageSource: `url(${personalizationUrl}/${frameName}/infowidget.gif)` }}></div>
+                    {frameAssetUrl &&
+                        <div className='frame-infowidget-custom' style={{ borderImageSource: `url(${frameAssetUrl})` }}></div>}
 
                     <Flex alignItems="center" justifyContent="between">
                         <Flex alignItems="center" gap={1}>

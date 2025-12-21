@@ -26,6 +26,7 @@ export * from './inventory';
 export * from './inventory/achievements';
 export * from './inventory/avatareffect';
 export * from './inventory/badges';
+export * from './inventory/frames';
 export * from './inventory/clothes';
 export * from './inventory/furni';
 export * from './inventory/furni/gifts';

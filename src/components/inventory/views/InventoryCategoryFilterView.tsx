@@ -1,7 +1,7 @@
 import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { GroupItem, LocalizeBadgeName, LocalizeText } from '../../../api';
 import { Flex } from '../../../common';
-import { InventoryFilterType, TAB_BADGES, TAB_FURNITURE } from '../constants';
+import { InventoryFilterType, TAB_BADGES, TAB_FRAMES, TAB_FURNITURE } from '../constants';
 
 export interface InventoryCategoryFilterViewProps
 {
@@ -10,11 +10,13 @@ export interface InventoryCategoryFilterViewProps
     badgeCodes: string[];
     setGroupItems: Dispatch<SetStateAction<GroupItem[]>>;
     setBadgeCodes: Dispatch<SetStateAction<string[]>>;
+    frameCodes?: string[];
+    setFrameCodes?: Dispatch<SetStateAction<string[]>>;
 }
 
 export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> = props =>
 {
-    const { currentTab = null, groupItems = [], badgeCodes = [], setGroupItems = null, setBadgeCodes = null } = props;
+    const { currentTab = null, groupItems = [], badgeCodes = [], frameCodes = [], setGroupItems = null, setBadgeCodes = null, setFrameCodes = null } = props;
     const [ filterType, setFilterType ] = useState<string>(InventoryFilterType.EVERYTHING);
     const [ filterPlace, setFilterPlace ] = useState<string>(InventoryFilterType.IN_INVENTORY);
     const [ searchValue, setSearchValue ] = useState('');
@@ -50,6 +52,24 @@ export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> =
         setBadgeCodes(filteredBadgeCodes);
 
     }, [ badgeCodes, currentTab, searchValue, setBadgeCodes ]);
+
+    useEffect(() =>
+    {
+        if ((currentTab !== TAB_FRAMES) || !setFrameCodes) return;
+
+        const comparison = searchValue.toLocaleLowerCase().trim();
+
+        if(!frameCodes || !frameCodes.length)
+        {
+            setFrameCodes([]);
+
+            return;
+        }
+
+        const filteredFrames = frameCodes.filter(code => code.toLocaleLowerCase().includes(comparison));
+
+        setFrameCodes(filteredFrames);
+    }, [ frameCodes, currentTab, searchValue, setFrameCodes ]);
     
     useEffect(() =>
     {
@@ -81,14 +101,14 @@ export const InventoryCategoryFilterView: FC<InventoryCategoryFilterViewProps> =
     }, [ currentTab ]);
     
     return (
-        <Flex className="nitro-inventory-category-filter rounded p-1 mt-n1" style={ { width: currentTab === TAB_BADGES ? '320px' : '100%' } }>
+        <Flex className="nitro-inventory-category-filter rounded p-1 mt-n1" style={ { width: (currentTab === TAB_BADGES || currentTab === TAB_FRAMES) ? '320px' : '100%' } }>
             <Flex className="position-relative">
                 <Flex fullWidth alignItems="center" position="relative">
                     <input type="text" className="form-control form-control-sm" value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
                 </Flex>
                 { (searchValue && !!searchValue.length) && <i className="icon icon-clear position-absolute cursor-pointer end-1 top-1" onClick={ event => setSearchValue('') } /> }
             </Flex>
-            { (currentTab !== TAB_BADGES) &&
+            { (currentTab !== TAB_BADGES && currentTab !== TAB_FRAMES) &&
                 <>
                     <Flex alignItems="center" position="relative" className="ms-2">
                         <select className="form-select form-select-sm" value={ filterType } onChange={ event => setFilterType(event.target.value) }>

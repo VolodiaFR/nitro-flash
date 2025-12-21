@@ -1,6 +1,7 @@
 export * from './achievements';
 export * from './avatareffect';
 export * from './badges';
+export * from './frames';
 export * from './clothing';
 export * from './furniture';
 export * from './pets';

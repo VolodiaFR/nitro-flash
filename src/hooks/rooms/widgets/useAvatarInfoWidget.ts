@@ -62,7 +62,7 @@ const useAvatarInfoWidgetState = () =>
                         const displayText = assignment.label && assignment.label.length
                             ? assignment.label
                             : (assignment.value !== null ? assignment.value.toString() : parser.variableName);
-                        newBubbles.push(new AvatarInfoName(assignment.roomIndex, RoomObjectCategory.UNIT, userData.webID, displayText, userData.type, false));
+                        newBubbles.push(new AvatarInfoName(assignment.roomIndex, RoomObjectCategory.UNIT, userData.webID, displayText, userData.type, false, userData.avatarFrame));
                     }
                 });
 
@@ -200,7 +200,7 @@ const useAvatarInfoWidgetState = () =>
 
             if(friends.find(friend => (friend.id === user.webID)))
             {
-                addedNameBubbles.push(new AvatarInfoName(user.roomIndex, RoomObjectCategory.UNIT, user.webID, user.name, user.type, true));
+                addedNameBubbles.push(new AvatarInfoName(user.roomIndex, RoomObjectCategory.UNIT, user.webID, user.name, user.type, true, user.avatarFrame));
             }
         });
 

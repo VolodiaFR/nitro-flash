@@ -38,6 +38,7 @@ export class AvatarInfoUser implements IAvatarInfo
     public canTradeReason: number = 0;
     public targetRoomControllerLevel: number = 0;
     public isAmbassador: boolean = false;
+    public avatarFrame: string = '';
 
     constructor(public readonly type: string) 
     {}

@@ -1,8 +1,8 @@
-import { ExtendedProfileChangedMessageEvent, NitroConfiguration, RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomEngineObjectEvent, RoomObjectCategory, RoomObjectType, UserCurrentBadgesComposer, UserCurrentBadgesEvent, UserProfileEvent, UserProfileParser, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
+import { ExtendedProfileChangedMessageEvent, RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomEngineObjectEvent, RoomObjectCategory, RoomObjectType, UserCurrentBadgesComposer, UserCurrentBadgesEvent, UserProfileEvent, UserProfileParser, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
 import { FC, useState } from 'react';
 import { CreateLinkEvent, GetRoomSession, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer } from '../../api';
 import { Column, Flex, Grid, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../common';
-import { useMessageEvent, useRoomEngineEvent } from '../../hooks';
+import { useFrameAsset, useMessageEvent, useRoomEngineEvent } from '../../hooks';
 import { BadgesContainerView } from './views/BadgesContainerView';
 import { FriendsContainerView } from './views/FriendsContainerView';
 import { GroupsContainerView } from './views/GroupsContainerView';
@@ -81,23 +81,24 @@ export const UserProfileView: FC<{}> = props => {
         GetUserProfile(userData.webID);
     });
 
-    if (!userProfile) return null;
+    const profileFrameUrl = useFrameAsset(userProfile?.avatarFrame, 'profile');
 
-    const frameName = "airplane";
-    const personalizationUrl = NitroConfiguration.getValue<string>('personalization.url');
+    if (!userProfile) return null;
 
     return (
         <NitroCardView uniqueKey="nitro-user-profile" theme="primary" className="user-profile">
-            <div className="frame-profile-custom frame-general-custom" style={ {backgroundImage: `url(${personalizationUrl}/${frameName}/profile.gif)`} }></div>
+            {profileFrameUrl &&
+                <div className="frame-profile-custom frame-general-custom" style={{ backgroundImage: `url(${profileFrameUrl})` }}></div>}
             <NitroCardHeaderView headerText={LocalizeText('extendedprofile.caption')} onCloseClick={onClose} />
             <NitroCardContentView overflow="hidden">
                 <Grid fullHeight={false} gap={2}>
                     <Column size={7} gap={1} className="user-container pe-2">
                         <UserContainerView userProfile={userProfile} />
                         {userProfile.id === GetSessionDataManager().userId &&
-                            <Flex className="p-0">
+                            <Flex className="p-0" gap={ 2 }>
                                 <Text small underline className="cursor-pointer" onClick={event => CreateLinkEvent('avatar-editor/toggle')}>Change Clothes</Text>
                                 <Text className="cursor-pointer badge-text" small underline onClick={event => CreateLinkEvent('inventory/toggle')}>Change Badges</Text>
+                                <Text className="cursor-pointer" small underline onClick={event => CreateLinkEvent('inventory/frames')}>Change Frame</Text>
                             </Flex>
                         }
                         <Grid columnCount={5} fullHeight className="profile-grey-bg p-1">

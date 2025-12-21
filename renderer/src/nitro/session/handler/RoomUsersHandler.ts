@@ -75,6 +75,7 @@ export class RoomUsersHandler extends BaseHandler
                 userData.petLevel = user.petLevel;
                 userData.botSkills = user.botSkills;
                 userData.isModerator = user.isModerator;
+                userData.avatarFrame = user.avatarFrame;
 
                 if(!session.userDataManager.getUserData(user.roomIndex)) usersToAdd.push(userData);
 
@@ -100,8 +101,9 @@ export class RoomUsersHandler extends BaseHandler
         session.userDataManager.updateFigure(parser.unitId, parser.figure, parser.gender, false, false);
         session.userDataManager.updateMotto(parser.unitId, parser.motto);
         session.userDataManager.updateAchievementScore(parser.unitId, parser.achievementScore);
+        session.userDataManager.updateAvatarFrame(parser.unitId, parser.avatarFrame);
 
-        this.listener.events.dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore));
+        this.listener.events.dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore, parser.avatarFrame));
 
     }
 

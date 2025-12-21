@@ -4,5 +4,6 @@ export * from './badges';
 export * from './clothes';
 export * from './furni';
 export * from './furni/gifts';
+export * from './frames';
 export * from './pets';
 export * from './trading';

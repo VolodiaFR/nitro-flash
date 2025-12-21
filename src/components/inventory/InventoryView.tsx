@@ -2,14 +2,15 @@ import { BadgePointLimitsEvent, ILinkEventTracker, IRoomSession, RoomEngineObjec
 import { FC, useEffect, useState } from 'react';
 import { AddEventLinkTracker, GetLocalization, GetRoomEngine, GroupItem, LocalizeText, RemoveLinkEventTracker, isObjectMoverRequested, setObjectMoverRequested } from '../../api';
 import { NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../common';
-import { useInventoryBadges, useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
-import { TABS, TAB_BADGES, TAB_BOTS, TAB_FURNITURE, TAB_PETS, UNSEEN_CATEGORIES } from './constants';
+import { useInventoryBadges, useInventoryFrames, useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
+import { TABS, TAB_BADGES, TAB_BOTS, TAB_FRAMES, TAB_FURNITURE, TAB_PETS, UNSEEN_CATEGORIES } from './constants';
 import { InventoryBadgeView } from './views/badge/InventoryBadgeView';
 import { InventoryBotView } from './views/bot/InventoryBotView';
 import { InventoryFurnitureView } from './views/furniture/InventoryFurnitureView';
 import { InventoryTradeView } from './views/furniture/InventoryTradeView';
 import { InventoryPetView } from './views/pet/InventoryPetView';
 import { InventoryCategoryFilterView } from './views/InventoryCategoryFilterView';
+import { InventoryFrameView } from './views/frame/InventoryFrameView';
 
 export const InventoryView: FC<{}> = props =>
 {
@@ -19,10 +20,12 @@ export const InventoryView: FC<{}> = props =>
     const [ roomPreviewer, setRoomPreviewer ] = useState<RoomPreviewer>(null);
     const [ filteredGroupItems, setFilteredGroupItems ] = useState<GroupItem[]>([]);
     const [ filteredBadgeCodes, setFilteredBadgeCodes ] = useState<string[]>([]);
+    const [ filteredFrameCodes, setFilteredFrameCodes ] = useState<string[]>([]);
     const { isTrading = false, stopTrading = null } = useInventoryTrade();
     const { getCount = null } = useInventoryUnseenTracker();
     const { groupItems = [] } = useInventoryFurni();
     const { badgeCodes = [] } = useInventoryBadges();
+    const { frameCodes = [] } = useInventoryFrames();
 
     const onClose = () =>
     {
@@ -84,6 +87,10 @@ export const InventoryView: FC<{}> = props =>
                     case 'toggle':
                         setIsVisible(prevValue => !prevValue);
                         return;
+                    case 'frames':
+                        setCurrentTab(TAB_FRAMES);
+                        setIsVisible(true);
+                        return;
                 }
             },
             eventUrlPrefix: 'inventory/'
@@ -131,13 +138,15 @@ export const InventoryView: FC<{}> = props =>
                     }) }
                 </NitroCardTabsView>
                 <NitroCardContentView overflow="hidden">
-                    { (currentTab !== TAB_PETS && currentTab !== TAB_BOTS) && <InventoryCategoryFilterView currentTab={ currentTab } groupItems={ groupItems } setGroupItems={ setFilteredGroupItems } badgeCodes={ badgeCodes } setBadgeCodes={ setFilteredBadgeCodes } /> }
+                        { (currentTab !== TAB_PETS && currentTab !== TAB_BOTS) && <InventoryCategoryFilterView currentTab={ currentTab } groupItems={ groupItems } setGroupItems={ setFilteredGroupItems } badgeCodes={ badgeCodes } setBadgeCodes={ setFilteredBadgeCodes } frameCodes={ frameCodes } setFrameCodes={ setFilteredFrameCodes } /> }
                     { (currentTab === TAB_FURNITURE ) &&
                             <InventoryFurnitureView roomSession={ roomSession } roomPreviewer={ roomPreviewer } isTrading={ isTrading } filteredGroupItems={ filteredGroupItems } /> }
                     { (currentTab === TAB_PETS ) &&
                             <InventoryPetView roomSession={ roomSession } roomPreviewer={ roomPreviewer } isTrading={ isTrading } /> }
                     { (currentTab === TAB_BADGES ) &&
                             <InventoryBadgeView filteredBadgeCodes={ filteredBadgeCodes } /> }
+                        { (currentTab === TAB_FRAMES ) &&
+                            <InventoryFrameView filteredFrameCodes={ filteredFrameCodes } /> }
                     { (currentTab === TAB_BOTS ) &&
                             <InventoryBotView roomSession={ roomSession } roomPreviewer={ roomPreviewer } isTrading={ isTrading } /> }
                     { isTrading && <InventoryTradeView currentTab={ currentTab } setCurrentTab={ (e) => setCurrentTab(e) } cancelTrade={ onClose } /> }

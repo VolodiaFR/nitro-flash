@@ -28,6 +28,8 @@ export class OutgoingHeader
     public static WIRED_CLIPBOARD_PASTE = 6055;
     public static WIRED_CLIPBOARD_TOGGLE_AUTOPASTE = 6056;
     public static PUT_MORE_FROM_INVENTORY = 6057;
+    public static GET_AVATAR_FRAMES = 6058;
+    public static SET_ACTIVATED_FRAME = 6059;
     
     //CUSTOM FURNIFIX / 1 CLICK
     public static CLICK_FURNI = 6002;

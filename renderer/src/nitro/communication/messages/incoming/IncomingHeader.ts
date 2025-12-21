@@ -5,6 +5,7 @@ export class IncomingHeader
     public static WIRED_SELECTOR = 2669;
     public static WIRED_CLIPBOARD_STATUS = 6062;
     public static ROOM_SPOTLIGHT_OVERLAY = 6064;
+    public static FRAME_INVENTORY = 6065;
     
 
     public static GET_FURNIFIXTOOL_FURNI_DATA = 2670;
