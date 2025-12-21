@@ -1,5 +1,6 @@
 import { ICatalogPage } from '../../../../../api';
 import { CatalogLayoutProps } from './CatalogLayout.types';
+import { CatalogLayoutAvatarFramesView } from './CatalogLayoutAvatarFramesView';
 import { CatalogLayoutBadgeDisplayView } from './CatalogLayoutBadgeDisplayView';
 import { CatalogLayoutColorGroupingView } from './CatalogLayoutColorGroupingView';
 import { CatalogLayoutDefaultView } from './CatalogLayoutDefaultView';
@@ -66,6 +67,8 @@ export const GetCatalogLayout = (page: ICatalogPage, hideNavigation: () => void)
             return <CatalogLayoutInfoLoyaltyView { ...layoutProps } />;
         case 'badge_display':
             return <CatalogLayoutBadgeDisplayView { ...layoutProps } />;
+        case 'avatar_frames':
+            return <CatalogLayoutAvatarFramesView { ...layoutProps } />;
         case 'roomads':
             return <CatalogLayoutRoomAdsView { ...layoutProps } />;
         case 'default_3x3_color_grouping':

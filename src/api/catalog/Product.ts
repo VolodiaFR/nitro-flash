@@ -1,4 +1,4 @@
-import { IFurnitureData, IObjectData, IProductData } from '@nitrots/nitro-renderer';
+import { IFurnitureData, IObjectData, IProductData, NitroConfiguration } from '@nitrots/nitro-renderer';
 import { GetConfiguration, GetRoomEngine, GetSessionDataManager } from '../nitro';
 import { GetPixelEffectIcon, GetSubscriptionProductIcon } from './CatalogUtilities';
 import { IProduct } from './IProduct';
@@ -78,6 +78,13 @@ export class Product implements IProduct
             case ProductTypeEnum.HABBO_CLUB:
                 return GetSubscriptionProductIcon(this.productClassId);
             case ProductTypeEnum.BADGE:
+                if(this._extraParam && this.isFrameBadge(this._extraParam))
+                {
+                    const personalizationUrl = NitroConfiguration.getValue<string>('personalization.url');
+
+                    if(personalizationUrl) return `${ personalizationUrl }/${ this._extraParam }/border.png`;
+                }
+
                 return GetSessionDataManager().getBadgeUrl(this._extraParam);
             case ProductTypeEnum.ROBOT:
                 return null;
@@ -139,5 +146,14 @@ export class Product implements IProduct
     public set uniqueLimitedItemsLeft(uniqueLimitedItemsLeft: number)
     {
         this._uniqueLimitedItemsLeft = uniqueLimitedItemsLeft;
+    }
+
+    private isFrameBadge(code: string): boolean
+    {
+        if(!code) return false;
+
+        const lowered = code.toLowerCase();
+
+        return lowered.includes('frame_') || lowered.startsWith('frame') || lowered.endsWith('frame');
     }
 }

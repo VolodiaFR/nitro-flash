@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { GetSessionDataManager, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { AutoGrid, Button, Column, Flex, LayoutAvatarImageView, Text } from '../../../../common';
+import { AutoGrid, Button, Column, Flex, Text } from '../../../../common';
 import { useFrameAsset, useInventoryFrames, useInventoryUnseenTracker } from '../../../../hooks';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryFrameItemView } from './InventoryFrameItemView';
@@ -77,12 +77,12 @@ export const InventoryFrameView: FC<InventoryFrameViewProps> = props =>
     }
 
     return (
-        <Flex gap={ 2 } className="inventory-frames h-100">
-            <Column grow overflow="hidden" className="inventory-frames-grid">
+        <Flex gap={ 3 } className="inventory-frames h-100">
+            <Column grow overflow="hidden" className="inventory-frames-grid" >
                 { (visibleFrames.length > 0) &&
-                    <AutoGrid gap={ 1 } columnCount={ 2 }>
+                    <div className='grid-frames' >
                         { visibleFrames.map(frame => <InventoryFrameItemView key={ frame.frameId } frameCode={ frame.frameCode } figure={ sessionFigure } />) }
-                    </AutoGrid>
+                    </div>
                 }
                 { (!visibleFrames.length) &&
                     <Flex fullHeight center className="inventory-frames__empty-search">
@@ -90,24 +90,24 @@ export const InventoryFrameView: FC<InventoryFrameViewProps> = props =>
                     </Flex>
                 }
             </Column>
-            <Column className="inventory-frames-preview" justifyContent="between" gap={ 2 }>
+            <Column className="inventory-frames-preview" justifyContent="between" gap={ 2 } >
                 <Column gap={ 1 }>
                     <Text bold>{ LocalizeText('inventory.frames.preview.title') }</Text>
-                    <Text small>{ LocalizeText('inventory.frames.preview.desc') }</Text>
                 </Column>
+                <Flex center>
                 <div className="inventory-frame-preview-stage">
-                    <LayoutAvatarImageView figure={ sessionFigure } direction={ 2 } className="inventory-frame-preview-avatar" />
-                    { previewUrl && <div className="inventory-frame-preview-overlay" style={ { backgroundImage: `url(${ previewUrl })` } } /> }
+                    { previewUrl && <div className="inventory-frame-item-preview" style={ { backgroundImage: `url(${ previewUrl })` } } /> }
                 </div>
+                </Flex>
                 <Column gap={ 1 }>
-                    <Text bold small>{ selectedFrameCode || LocalizeText('inventory.frames.preview.placeholder') }</Text>
+                    <Text bold small>{ selectedFrameCode ? LocalizeText("frame.title." + selectedFrameCode) : LocalizeText('inventory.frames.preview.placeholder') }</Text>
                     <Text small wrap>
-                        { selectedFrame ? LocalizeText(isFrameActive("frame." + selectedFrame.frameCode) ? 'inventory.frames.state.active' : 'inventory.frames.state.inactive') : LocalizeText('inventory.frames.preview.selectone') }
+                        { selectedFrame ? LocalizeText(isFrameActive("frame.title." + selectedFrame.frameCode) ? 'inventory.frames.state.active' : 'inventory.frames.state.inactive') : LocalizeText('inventory.frames.preview.selectone') }
                     </Text>
                 </Column>
                 <Column gap={ 1 }>
                     <Button className="btn btn-primary" disabled={ !selectedFrameCode } onClick={ () => toggleFrame(selectedFrameCode) }>
-                        { LocalizeText(isFrameActive(selectedFrameCode) ? 'inventory.frames.button.remove' : 'inventory.frames.button.wear') }
+                        { LocalizeText( 'inventory.frames.button.wear') }
                     </Button>
                     <Button disabled={ !activeFrameCode } variant="danger" onClick={ clearFrame }>
                         { LocalizeText('inventory.frames.button.clear') }

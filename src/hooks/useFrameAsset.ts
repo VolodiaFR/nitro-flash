@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 const FRAME_ASSET_FILES = {
     profile: 'profile.gif',
     infowidget: 'infowidget.gif',
-    border: 'border.png',
-    username: 'username.png'
+    border: 'border.gif',
+    username: 'username.gif',
+    preview: 'preview.gif'
 } as const;
 
 export type FrameAssetType = keyof typeof FRAME_ASSET_FILES;

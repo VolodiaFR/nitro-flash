@@ -139,6 +139,7 @@
         max-height: 100%;
         overflow-y: auto;
         padding-right: 4px;
+
     }
 
     &__empty-search {
@@ -147,80 +148,51 @@
     }
 }
 
-.inventory-frames-preview {
-    width: 240px;
-    background-color: #d9d9d9;
-    border-radius: 8px;
-    padding: 12px;
+.grid-frames {
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 
-    .inventory-frame-preview-stage {
-        position: relative;
-        background-color: #ffffff;
-        border-radius: 8px;
-        min-height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-
-    .inventory-frame-preview-avatar {
-        transform: scale(1.1);
-    }
-
-    .inventory-frame-preview-overlay {
-        position: absolute;
-        inset: 0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-        pointer-events: none;
-    }
 }
 
 .inventory-frame-item {
+
+    height: 55px;
+}
+
+.inventory-frames-grid {
+    height: 240px;
+    overflow-y: auto;
+}
+
+.inventory-frame-item__overlay {
+    width: 667px;
+    height: 605px;
+    background-position: 50% -1%;
+    background-repeat: no-repeat;
+
+}
+
+.inventory-frame-item-preview {
+    width: 667px;
+    height: 605px;
+    background-position: 50% -5px;
+    background-repeat: no-repeat;
+}
+
+.inventory-frame-preview-stage {
+    display: flex;
+    justify-content: center;
+    width: 200px;
+    height: 55px;
+    padding: 5px;
+    overflow: hidden;
+    background-color: white;
+    border-image-source: url(@/assets/flash/inventory/item.png) !important;
+    border-image-slice: 6 6 6 6 fill !important;
+    border-image-width: 6px 6px 6px 6px !important;
+    border-radius: 10px;
     position: relative;
-    padding-bottom: 12px;
 
-    .inventory-frame-item__preview {
-        position: relative;
-        width: 100%;
-        height: 80px;
-        background-color: #ffffff;
-        border-radius: 6px;
-        overflow: hidden;
-    }
-
-    .inventory-frame-item__avatar {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0.85);
-    }
-
-    .inventory-frame-item__overlay {
-        position: absolute;
-        inset: 0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-        pointer-events: none;
-    }
-
-    .inventory-frame-item__code {
-        margin-top: 4px;
-    }
-
-    .inventory-frame-item__status {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        font-size: 10px;
-        background-color: #0fb176;
-        color: #fff;
-        padding: 1px 6px;
-        border-radius: 4px;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
 }

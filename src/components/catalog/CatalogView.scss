@@ -93,6 +93,45 @@
             height: 20px;
         }
     }
+
+    .catalog-frame-preview {
+        background-color: #d9d9d9;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .catalog-frame-preview-stage {
+            position: relative;
+            min-height: 220px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .catalog-frame-preview-avatar {
+            position: relative;
+            transform: scale(1.15);
+        }
+
+        .catalog-frame-preview-overlay {
+            position: absolute;
+            inset: 0;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            pointer-events: none;
+        }
+
+        .catalog-frame-preview-code {
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+    }
 }
 
 .group-forum-page {
