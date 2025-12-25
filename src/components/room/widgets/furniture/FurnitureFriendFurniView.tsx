@@ -54,7 +54,7 @@ export const FurnitureFriendFurniView: FC<{}> = props =>
                             </div>
                             <div>{ date }</div>
                         </Column>
-                        <Flex justifyContent="center" gap={ 4 }>
+                        <Flex justifyContent="center" gap={ 4 } style={{position:"relative", top:"-5px"}}>
                             <div>{ usernames[0] }</div>
                             <div>{ usernames[1] }</div>
                         </Flex>

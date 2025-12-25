@@ -42,7 +42,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
     const handleCopyClipboard = () => {
         if (!copyWiredClipboard) return;
 
-        copyWiredClipboard();
+        copyWiredClipboard(false, true);
         setMenuOpen(false);
     };
 

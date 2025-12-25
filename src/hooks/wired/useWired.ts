@@ -1,9 +1,10 @@
 import { ConditionDefinition, CopyWiredConfigMessageComposer, OpenMessageComposer, PasteWiredConfigMessageComposer, SetWiredClipboardAutopasteMessageComposer, Triggerable, TriggerDefinition, UpdateActionMessageComposer, UpdateAddonMessageComposer, UpdateConditionMessageComposer, UpdateSelectorMessageComposer, UpdateTriggerMessageComposer, WiredActionDefinition, WiredAddonDefinition, WiredClipboardStatusAction, WiredClipboardStatusEntry, WiredClipboardStatusMessageEvent, WiredFurniActionEvent, WiredFurniAddonEvent, WiredFurniConditionEvent, WiredFurniSelectorEvent, WiredFurniTriggerEvent, WiredOpenEvent, WiredSaveSuccessEvent, WiredSelectorDefinition } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
-import { IsOwnerOfFloorFurniture, LocalizeText, SendMessageComposer, WiredFurniType, WiredSelectionVisualizer } from '../../api';
+import { IsOwnerOfFloorFurniture, LocalizeText, RoomWidgetUpdateRoomObjectEvent, SendMessageComposer, WiredFurniType, WiredSelectionVisualizer } from '../../api';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
+import { useObjectDoubleClickedEvent } from '../rooms';
 
 interface WiredClipboardStatusState
 {
@@ -94,57 +95,152 @@ const useWiredState = () =>
         setTrigger(definition);
     }, []);
 
-    const saveWired = () =>
+    const sendConfigurationFromState = useCallback((definition: Triggerable | null) =>
     {
-        const save = (trigger: Triggerable) =>
+        if (!definition) return false;
+
+        if (definition instanceof WiredActionDefinition)
         {
-            if (!trigger) return;
-
-            if (trigger instanceof WiredActionDefinition)
-            {
-                SendMessageComposer(new UpdateActionMessageComposer(trigger.id, intParams, stringParam, furniIds, actionDelay, furniOptions, furniType, userOptions, userType, trigger.stuffTypeSelectionCode, destFurniIds));
-            }
-
-            else if (trigger instanceof TriggerDefinition)
-            {
-                SendMessageComposer(new UpdateTriggerMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.stuffTypeSelectionCode));
-            }
-
-            else if (trigger instanceof ConditionDefinition)
-            {
-                SendMessageComposer(new UpdateConditionMessageComposer(trigger.id, intParams, stringParam, furniIds, furniOptions, furniType, userOptions, userType, allOrOneOptions, allOrOneType));
-            }
-            else if (trigger instanceof WiredSelectorDefinition)
-            {
-                SendMessageComposer(new UpdateSelectorMessageComposer(trigger.id, intParams, stringParam, furniIds, isFiltered, isInverted, trigger.stuffTypeSelectionCode,));
-            }
-            else if (trigger instanceof WiredAddonDefinition)
-            {
-                SendMessageComposer(new UpdateAddonMessageComposer(trigger.id, intParams, stringParam, furniIds, trigger.stuffTypeSelectionCode));
-            }
-        };
-
-        if (!IsOwnerOfFloorFurniture(trigger.id))
-        {
-            showConfirm(LocalizeText('wiredfurni.nonowner.change.confirm.body'), () =>
-            {
-                save(trigger);
-            }, null, null, null, LocalizeText('wiredfurni.nonowner.change.confirm.title'));
+            SendMessageComposer(new UpdateActionMessageComposer(definition.id, intParams, stringParam, furniIds, actionDelay, furniOptions, furniType, userOptions, userType, definition.stuffTypeSelectionCode, destFurniIds));
+            return true;
         }
-        else
-        {
-            save(trigger);
-        }
-    };
 
-    const copyWiredClipboard = useCallback((silent = false) =>
+        if (definition instanceof TriggerDefinition)
+        {
+            SendMessageComposer(new UpdateTriggerMessageComposer(definition.id, intParams, stringParam, furniIds, definition.stuffTypeSelectionCode));
+            return true;
+        }
+
+        if (definition instanceof ConditionDefinition)
+        {
+            SendMessageComposer(new UpdateConditionMessageComposer(definition.id, intParams, stringParam, furniIds, furniOptions, furniType, userOptions, userType, allOrOneOptions, allOrOneType));
+            return true;
+        }
+
+        if (definition instanceof WiredSelectorDefinition)
+        {
+            SendMessageComposer(new UpdateSelectorMessageComposer(definition.id, intParams, stringParam, furniIds, isFiltered, isInverted, definition.stuffTypeSelectionCode));
+            return true;
+        }
+
+        if (definition instanceof WiredAddonDefinition)
+        {
+            SendMessageComposer(new UpdateAddonMessageComposer(definition.id, intParams, stringParam, furniIds, definition.stuffTypeSelectionCode));
+            return true;
+        }
+
+        return false;
+    }, [intParams, stringParam, furniIds, actionDelay, furniOptions, furniType, userOptions, userType, allOrOneOptions, allOrOneType, isFiltered, isInverted, destFurniIds]);
+
+    const sendConfigurationFromDefinition = useCallback((definition: Triggerable | null) =>
+    {
+        if (!definition) return false;
+
+        if (definition instanceof WiredActionDefinition)
+        {
+            const destinationItems = definition.destinationSelectedItems || [];
+
+            SendMessageComposer(new UpdateActionMessageComposer(definition.id, definition.intData || [], definition.stringData || '', definition.selectedItems || [], definition.delayInPulses, definition.furniOptions, definition.furniType, definition.userOptions, definition.userType, definition.stuffTypeSelectionCode, destinationItems));
+            return true;
+        }
+
+        if (definition instanceof TriggerDefinition)
+        {
+            SendMessageComposer(new UpdateTriggerMessageComposer(definition.id, definition.intData || [], definition.stringData || '', definition.selectedItems || [], definition.stuffTypeSelectionCode));
+            return true;
+        }
+
+        if (definition instanceof ConditionDefinition)
+        {
+            SendMessageComposer(new UpdateConditionMessageComposer(definition.id, definition.intData || [], definition.stringData || '', definition.selectedItems || [], definition.furniOptions, definition.furniType, definition.userOptions, definition.userType, definition.allOrOneOptions, definition.allOrOneType));
+            return true;
+        }
+
+        if (definition instanceof WiredSelectorDefinition)
+        {
+            SendMessageComposer(new UpdateSelectorMessageComposer(definition.id, definition.intData || [], definition.stringData || '', definition.selectedItems || [], definition.isFiltered, definition.isInverted, definition.stuffTypeSelectionCode));
+            return true;
+        }
+
+        if (definition instanceof WiredAddonDefinition)
+        {
+            SendMessageComposer(new UpdateAddonMessageComposer(definition.id, definition.intData || [], definition.stringData || '', definition.selectedItems || [], definition.stuffTypeSelectionCode));
+            return true;
+        }
+
+        return false;
+    }, []);
+
+    const pushWiredConfiguration = useCallback(() => sendConfigurationFromState(trigger), [trigger, sendConfigurationFromState]);
+
+    const handleNonOwnerAction = useCallback((callback: () => void) =>
+    {
+        if (!trigger)
+        {
+            return;
+        }
+
+        if (!IsOwnerOfFloorFurniture(trigger.id) && showConfirm)
+        {
+            showConfirm(LocalizeText('wiredfurni.nonowner.change.confirm.body'), callback, null, null, null, LocalizeText('wiredfurni.nonowner.change.confirm.title'));
+            return;
+        }
+
+        callback();
+    }, [trigger, showConfirm]);
+
+    const saveWired = useCallback(() =>
+    {
+        if (!trigger)
+        {
+            return;
+        }
+
+        handleNonOwnerAction(() => pushWiredConfiguration());
+    }, [trigger, pushWiredConfiguration, handleNonOwnerAction]);
+
+    const copyWiredClipboard = useCallback((silent = false, syncWithUiState = false, skipOwnerGuard = false) =>
     {
         if (!trigger) return;
 
-        if (silent) silentCopyRef.current = true;
+        const doCopy = () =>
+        {
+            if (silent) silentCopyRef.current = true;
 
-        SendMessageComposer(new CopyWiredConfigMessageComposer(trigger.id));
-    }, [trigger]);
+            SendMessageComposer(new CopyWiredConfigMessageComposer(trigger.id));
+        };
+
+        if (syncWithUiState)
+        {
+            const revertSnapshot = cloneTriggerable(trigger);
+
+            const syncAndCopy = () =>
+            {
+                const pushed = sendConfigurationFromState(trigger);
+
+                doCopy();
+
+                if (pushed && revertSnapshot) sendConfigurationFromDefinition(revertSnapshot);
+            };
+
+            if (skipOwnerGuard)
+            {
+                syncAndCopy();
+                return;
+            }
+
+            handleNonOwnerAction(syncAndCopy);
+            return;
+        }
+
+        if (skipOwnerGuard)
+        {
+            doCopy();
+            return;
+        }
+
+        doCopy();
+    }, [trigger, sendConfigurationFromState, sendConfigurationFromDefinition, handleNonOwnerAction]);
 
     const pasteWiredClipboard = useCallback(() =>
     {
@@ -159,12 +255,16 @@ const useWiredState = () =>
         SendMessageComposer(new SetWiredClipboardAutopasteMessageComposer(enabled));
     }, []);
 
-    useEffect(() =>
+    const handleAutoPasteDoubleClick = useCallback((event: RoomWidgetUpdateRoomObjectEvent) =>
     {
-        if (!autoPasteEnabled || !trigger) return;
+        if (!autoPasteEnabled || !trigger || !copyWiredClipboard) return;
 
-        copyWiredClipboard(true);
+        if (!event || (event.objectId === trigger.id)) return;
+
+        copyWiredClipboard(true, true, true);
     }, [autoPasteEnabled, trigger, copyWiredClipboard]);
+
+    useObjectDoubleClickedEvent(handleAutoPasteDoubleClick);
 
     const clearFurniSelection = () =>
     {
