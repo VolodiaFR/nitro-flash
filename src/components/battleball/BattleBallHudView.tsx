@@ -10,6 +10,10 @@ const TEAM_META: Record<string, { label: string; accent: string }> = {
 };
 
 const TEAM_ORDER = [ 'red', 'green', 'blue', 'yellow' ];
+const TIMER_BASE_URL = 'https://assets.hobbu.net/bball/timer';
+const TIMER_DEFAULT_ASSET = `${ TIMER_BASE_URL }/timer_default.png`;
+const timerFrameAsset = (value: number) => `${ TIMER_BASE_URL }/timer_${ value }.png`;
+const clampTimerValue = (value: number) => Math.max(0, Math.min(10, value));
 
 const formatTimer = (seconds: number) =>
 {
@@ -21,13 +25,36 @@ const formatTimer = (seconds: number) =>
 
 export const BattleBallHudView: FC = () =>
 {
-    const { phase, hud } = useBattleBall();
+    const { phase, hud, powerUp, usePowerUp } = useBattleBall();
     const showHud = (phase === 'running');
     const hasLiveHud = !!hud;
     const totalTiles = Math.max(0, hud?.totalTiles ?? 0);
     const tilesRemaining = Math.max(0, hud?.tilesRemaining ?? totalTiles);
     const capturedTiles = Math.max(0, (totalTiles - tilesRemaining));
     const timeRemaining = Math.max(0, hud?.timeRemaining ?? 0);
+    const hasPowerUp = !!powerUp?.isActive;
+    const autoTriggerSeconds = Math.max(0, powerUp?.autoTriggerIn ?? 0);
+    const warmupSeconds = Math.max(0, powerUp?.warmupRemaining ?? 0);
+    const isWarmupActive = hasPowerUp && warmupSeconds > 0;
+    const canTriggerPowerUp = hasPowerUp && !isWarmupActive && Math.max(0, powerUp?.countdownRemaining ?? 0) > 0;
+
+    const timerAsset = useMemo(() =>
+    {
+        if(!hasPowerUp) return null;
+        return (powerUp?.warmupRemaining ?? 0) > 0 ? TIMER_DEFAULT_ASSET : timerFrameAsset(clampTimerValue(powerUp?.countdownRemaining ?? 0));
+    }, [ hasPowerUp, powerUp ]);
+
+    const powerUpIcon = useMemo(() =>
+    {
+        if(!hasPowerUp) return null;
+        return powerUp?.assetUrl || (powerUp?.type ? `https://assets.hobbu.net/bball/${ powerUp.type }.png` : null);
+    }, [ hasPowerUp, powerUp ]);
+
+    const autoTriggerLabel = !hasPowerUp
+        ? 'Sin power-up activo'
+        : isWarmupActive
+            ? `Cargando (${ warmupSeconds }s)`
+            : `Auto en ${ autoTriggerSeconds }s`;
 
     const progress = useMemo(() =>
     {
@@ -68,6 +95,30 @@ export const BattleBallHudView: FC = () =>
                 </div>
                 <span className="battleball-hud__timer">{ formatTimer(timeRemaining) }</span>
             </Flex>
+
+            <div className="battleball-powerups" aria-live="polite">
+                <div className="battleball-powerups__slot battleball-powerups__slot--timer">
+                    { timerAsset ?
+                        <img src={ timerAsset } alt={ hasPowerUp && (powerUp?.warmupRemaining ?? 0) > 0 ? 'Contador de power-up disponible' : 'Cuenta atrás del power-up' } className="battleball-powerups__image" />
+                        :
+                        <span className="battleball-powerups__empty">Sin contador</span> }
+                    <Text className="battleball-powerups__caption">{ autoTriggerLabel }</Text>
+                </div>
+
+                <button type="button" className="battleball-powerups__slot battleball-powerups__slot--action" disabled={ !canTriggerPowerUp }
+                    aria-label={ canTriggerPowerUp ? `Lanzar ${ powerUp?.displayName ?? 'power-up' }` : (isWarmupActive ? 'Power-up cargando' : 'Sin power-up disponible') }
+                    onClick={ usePowerUp }>
+                    { hasPowerUp ? (
+                        <>
+                            { powerUpIcon && <img src={ powerUpIcon } alt={ powerUp?.displayName ?? 'Power-up' } className="battleball-powerups__image" /> }
+                            <span className="battleball-powerups__label">{ powerUp?.displayName ?? 'Power-up' }</span>
+                            <span className="battleball-powerups__cta">{ isWarmupActive ? 'Cargando…' : 'Lanzar' }</span>
+                        </>
+                    ) : (
+                        <span className="battleball-powerups__empty">Sin power-up</span>
+                    ) }
+                </button>
+            </div>
 
             <Flex column gap={ 1 }>
                 { progress.map(entry =>

@@ -33,6 +33,18 @@ interface BattleBallHudState
     teams: BattleBallHudTeam[];
 }
 
+interface BattleBallPowerUpPayload
+{
+    isActive: boolean;
+    type: string;
+    displayName: string;
+    warmupRemaining: number;
+    countdownRemaining: number;
+    autoTriggerIn: number;
+    assetUrl: string | null;
+    reason: string | null;
+}
+
 interface BattleBallResultPlayer
 {
     username: string;
@@ -165,10 +177,53 @@ const sanitizeResultsPayload = (data: any): BattleBallResultsPayload | null =>
     };
 };
 
+const sanitizePowerUpPayload = (data: any): BattleBallPowerUpPayload | null =>
+{
+    if(!data || (typeof data !== 'object')) return null;
+
+    const isActive = !!data.active;
+    if(!isActive) return null;
+
+    const toNumber = (value: any) =>
+    {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const rawType = (typeof data.type === 'string') ? data.type.toLowerCase() : '';
+    const displayName = (typeof data.displayName === 'string') ? data.displayName : (rawType || '');
+    const warmupRemaining = Math.max(0, Math.min(10, toNumber(data.warmupRemaining)));
+    const countdownRemaining = Math.max(0, Math.min(10, toNumber(data.countdownRemaining)));
+    const autoTriggerIn = Math.max(0, toNumber(data.autoTriggerIn));
+
+    let assetUrl: string | null = null;
+
+    if(typeof data.assetUrl === 'string' && data.assetUrl.length)
+    {
+        assetUrl = data.assetUrl;
+    }
+    else if(rawType)
+    {
+        assetUrl = `https://assets.hobbu.net/bball/${ rawType }.png`;
+    }
+
+    return {
+        isActive: true,
+        type: rawType,
+        displayName,
+        warmupRemaining,
+        countdownRemaining,
+        autoTriggerIn,
+        assetUrl,
+        reason: (typeof data.reason === 'string') ? data.reason : null
+    };
+};
+
 enum BattleBallIncoming
 {
     SSO_LOGIN = 212,
-    BATTLEBALL_LEAVE = 217
+    BATTLEBALL_LEAVE = 217,
+    BATTLEBALL_USE_POWERUP = 238
 }
 
 enum BattleBallOutgoing
@@ -178,7 +233,8 @@ enum BattleBallOutgoing
     BATTLEBALL_STARTED = 227,
     BATTLEBALL_ENDED = 228,
     BATTLEBALL_JOIN_QUEUE = 229,
-    BATTLEBALL_HUD = 236
+    BATTLEBALL_HUD = 236,
+    BATTLEBALL_POWERUP = 237
 }
 
 const useBattleBallState = () =>
@@ -194,6 +250,7 @@ const useBattleBallState = () =>
     const [ countdown, setCountdown ] = useState<number>(null);
     const [ error, setError ] = useState<string>(null);
     const [ hud, setHud ] = useState<BattleBallHudState | null>(null);
+    const [ powerUp, setPowerUp ] = useState<BattleBallPowerUpPayload | null>(null);
     const [ results, setResults ] = useState<BattleBallResultsPayload | null>(null);
     const [ isResultsVisible, setResultsVisible ] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
@@ -312,6 +369,7 @@ const useBattleBallState = () =>
         clearCountdown();
         setConnectionState('idle');
         setHud(null);
+        setPowerUp(null);
         awaitingArenaForwardRef.current = false;
         arenaRoomIdRef.current = null;
     }, [ clearCountdown ]);
@@ -376,6 +434,11 @@ const useBattleBallState = () =>
                 case BattleBallOutgoing.BATTLEBALL_HUD: {
                     const parsedHud = sanitizeHudPayload(packet.data);
                     if(parsedHud) setHud(parsedHud);
+                    break;
+                }
+                case BattleBallOutgoing.BATTLEBALL_POWERUP: {
+                    const parsedPowerUp = sanitizePowerUpPayload(packet.data);
+                    setPowerUp(parsedPowerUp);
                     break;
                 }
                 default:
@@ -490,7 +553,13 @@ const useBattleBallState = () =>
         removeLocalPlayer();
         setPhase('idle');
         setHud(null);
+        setPowerUp(null);
     }, [ removeLocalPlayer, sendPayload ]);
+
+    const usePowerUp = useCallback(() =>
+    {
+        sendPayload(BattleBallIncoming.BATTLEBALL_USE_POWERUP, {});
+    }, [ sendPayload ]);
 
     useEffect(() =>
     {
@@ -586,10 +655,12 @@ const useBattleBallState = () =>
         error,
         maxPlayers,
         hud,
+        powerUp,
         results,
         isResultsVisible,
         joinBattleBallQueue,
         leaveBattleBallQueue,
+        usePowerUp,
         dismissResults,
         reconnect: connect,
         isBattleBallSelected,
